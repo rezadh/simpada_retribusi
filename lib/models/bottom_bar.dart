@@ -7,10 +7,10 @@ class BottomBar extends StatefulWidget {
   IconData icons;
 
   BottomBar(
-      {required this.onPressed,
-      required this.bottomIcons,
-      required this.text,
-      required this.icons});
+      {this.onPressed,
+      this.bottomIcons,
+      this.text,
+      this.icons});
 
   @override
   _BottomBarState createState() => _BottomBarState();

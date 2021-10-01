@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/models/bottom_bar.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
+import 'package:simpada/screen/login/login_screen.dart';
 
 class AkunScreen extends StatefulWidget {
-  const AkunScreen({Key? key}) : super(key: key);
 
   @override
   _AkunScreenState createState() => _AkunScreenState();
@@ -222,13 +223,15 @@ class _AkunScreenState extends State<AkunScreen> {
                             borderRadius:
                             BorderRadius.circular(18.0),
                           ),
-                          onPressed: () {
-                            // Navigator.pushReplacement(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => RegistrasiScreen(),
-                            //   ),
-                            // );
+                          onPressed: () async {
+                            SharedPreferences prefs = await SharedPreferences.getInstance();
+                            prefs.setInt('value', 0);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => LoginScreen(),
+                              ),
+                            );
                           },
                           child: Text(
                             'Keluar',

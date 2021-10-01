@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:simpada/screen/transaksi/transaksi_screen.dart';
 
 class DetailRetribusiScreen extends StatefulWidget {
-  const DetailRetribusiScreen({Key? key}) : super(key: key);
 
   @override
   _DetailRetribusiScreenState createState() => _DetailRetribusiScreenState();
@@ -12,7 +12,46 @@ class DetailRetribusiScreen extends StatefulWidget {
 
 class _DetailRetribusiScreenState extends State<DetailRetribusiScreen> {
   TextEditingController totalBayarController = TextEditingController();
-
+  var _dateNow;
+  getDate(){
+    var dateNow = DateTime.now();
+    var date = DateFormat('dd').format(dateNow);
+    var month = DateFormat('MM').format(dateNow);
+    var year = DateFormat('yyyy').format(dateNow);
+    String parseMonth;
+    if (month == '01') {
+      parseMonth = 'Januari';
+    } else if (month == '02') {
+      parseMonth = 'Februari';
+    } else if (month == '03') {
+      parseMonth = 'Maret';
+    } else if (month == '04') {
+      parseMonth = 'April';
+    } else if (month == '05') {
+      parseMonth = 'Mei';
+    } else if (month == '06') {
+      parseMonth = 'Juni';
+    } else if (month == '07') {
+      parseMonth = 'Juli';
+    } else if (month == '08') {
+      parseMonth = 'Agustus';
+    } else if (month == '09') {
+      parseMonth = 'September';
+    } else if (month == '10') {
+      parseMonth = 'Oktober';
+    } else if (month == '11') {
+      parseMonth = 'November';
+    } else if (month == '12') {
+      parseMonth = 'Desember';
+    }
+    _dateNow = '$date $parseMonth $year';
+    return _dateNow;
+  }
+  @override
+  void initState() {
+    getDate();
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -362,7 +401,7 @@ class _DetailRetribusiScreenState extends State<DetailRetribusiScreen> {
                                 ),
                               ),
                               Text(
-                                '04 Agustus 2021',
+                                _dateNow.toString(),
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -428,7 +467,7 @@ class _DetailRetribusiScreenState extends State<DetailRetribusiScreen> {
                                 ),
                               ),
                               Text(
-                                'Pasar Antang',
+                                'Parkir RS Bungsu',
                                 style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
@@ -533,7 +572,7 @@ class _DetailRetribusiScreenState extends State<DetailRetribusiScreen> {
                                         fillColor: Color(0xFFF9F9F9),
                                       ),
                                       validator: (value) {
-                                        if (value!.isEmpty) {
+                                        if (value.isEmpty) {
                                           return 'Tidak boleh kosong';
                                         }
                                         return null;

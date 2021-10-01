@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simpada/data/api/api_service.dart';
+import 'package:simpada/data/model/simpada_retribusi.dart';
+import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 import 'package:simpada/screen/login/registrasi_screen.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({Key key}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -16,6 +20,97 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  String _noHp;
+  String _password;
+  Login login;
+
+  getValue() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int value = prefs.getInt('value');
+    String code = prefs.getString('code');
+    if (value == 1) {
+      if (code != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => DashboardScreen()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => RegistrasiScreen()),
+        );
+      }
+    }
+    return value;
+  }
+
+  void _checkStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if(_noHp != null && _password != null){
+      await getToken(noHpController.text, passwordController.text).then((value) async {
+        if (value != null) {
+          await postRequestLogin(_noHp, _password).then((value) {
+            if (value != null) {
+              setState(() {
+                if (_noHp != null && _password != null) {
+                  prefs.setString('noHp', _noHp);
+                  prefs.setString('password', _password);
+                  prefs.setInt('value', 1);
+                  prefs.setString('name', value.name);
+                  String code = prefs.getString('code');
+                  //TODO tambahkan validasi jika kode registrasi sudah ada
+                  if(code != null){
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => DashboardScreen()),
+                    );
+                  }else {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => RegistrasiScreen()),
+                    );
+                  }
+                }
+              });
+            } else {}
+          });
+        } else {
+          showPop('Login gagal', 'username dan password salah');
+        }
+      });
+    }
+
+  }
+
+  Future<bool> showPop(String title, String message) => showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 16),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(fontSize: 18),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('TUTUP'),
+            ),
+          ],
+        ),
+      );
+
+  @override
+  void initState() {
+    setState(() {
+      getValue();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Image.asset('images/logo.png', width: 182,),
+                    Image.asset(
+                      'images/logo.png',
+                      width: 182,
+                    ),
                     SizedBox(
                       height: 10,
                     ),
@@ -52,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 20,
                     ),
                     TextFormField(
+                      keyboardType: TextInputType.number,
                       controller: noHpController,
                       decoration: InputDecoration(
                         hintText: 'Nomor Ponsel',
@@ -72,8 +171,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         filled: true,
                         fillColor: Color(0xFFFFFFFF),
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          _noHp = noHpController.text;
+                        });
+                      },
                       validator: (value) {
-                        if (value!.isEmpty) {
+                        if (value.isEmpty) {
                           return 'Tidak boleh kosong';
                         }
                         return null;
@@ -117,6 +221,11 @@ class _LoginScreenState extends State<LoginScreen> {
                         filled: true,
                         fillColor: Color(0xFFFFFFFF),
                       ),
+                      onChanged: (value) {
+                        setState(() {
+                          _password = passwordController.text;
+                        });
+                      },
                     ),
                     SizedBox(
                       height: 20,
@@ -137,17 +246,20 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Color(0xFF01A190),
                       minWidth: double.infinity,
                       shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
+                        borderRadius: BorderRadius.circular(18.0),
                       ),
                       onPressed: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => RegistrasiScreen(),
-                          ),
-                        );
+                        setState(() {
+                          _checkStatus();
+                          // getToken();
+                          // postRegistration();
+                          // postRequestLogin(noHpController.text);
+                        });
                       },
-                      child: Text('Masuk', style: TextStyle(color: Colors.white),),
+                      child: Text(
+                        'Masuk',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ],
                 ),

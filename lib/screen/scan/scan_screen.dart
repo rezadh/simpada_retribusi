@@ -3,7 +3,6 @@ import 'package:simpada/screen/scan/input_retribusi_screen.dart';
 import 'package:simpada/screen/scan/scan_qr_screen.dart';
 
 class ScanScreen extends StatefulWidget {
-  const ScanScreen({Key? key}) : super(key: key);
 
   @override
   _ScanScreenState createState() => _ScanScreenState();
@@ -83,8 +82,7 @@ class _ScanScreenState extends State<ScanScreen> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) =>
-                                            ScanQRScreen(),
+                                        builder: (context) => ScanQRScreen(),
                                       ),
                                     );
                                   },
@@ -129,9 +127,12 @@ class _ScanScreenState extends State<ScanScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 30),
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-
+                          Image.asset(
+                            'images/input.png',
+                            width: 71,
+                          ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [

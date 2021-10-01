@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:intl/intl.dart';
 import 'package:simpada/models/bottom_bar.dart';
 import 'package:simpada/screen/generate/generate_screen.dart';
 import 'package:simpada/screen/profile/akun_screen.dart';
@@ -22,7 +23,6 @@ final List<String> titles = [
 ];
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
@@ -33,7 +33,72 @@ enum BottomIcons { Beranda, Akun }
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   BottomIcons bottomIcons = BottomIcons.Beranda;
-
+  var _parseMonth;
+  var _dateTimeNow;
+  var _parseDay;
+  void _getDate(){
+    var dateNow = DateTime.now();
+    var day = DateFormat('EEEE').format(dateNow);
+    var dayDateNow = DateFormat('dd').format(dateNow);
+    var monthDateNow = DateFormat('MM').format(dateNow);
+    var yearDateNow = DateFormat('yyyy').format(dateNow);
+    _parseDay = _getHari(day);
+    _parseMonth = getMonth(monthDateNow);
+    _dateTimeNow = '$_parseDay, $dayDateNow $_parseMonth $yearDateNow';
+  }
+  String getMonth(String month) {
+    if (month == '01') {
+      return 'Januari';
+    } else if (month == '02') {
+      return 'Februari';
+    } else if (month == '03') {
+      return 'Maret';
+    } else if (month == '04') {
+      return 'April';
+    } else if (month == '05') {
+      return 'Mei';
+    } else if (month == '06') {
+      return 'Juni';
+    } else if (month == '07') {
+      return 'Juli';
+    } else if (month == '08') {
+      return 'Agustus';
+    } else if (month == '09') {
+      return 'September';
+    } else if (month == '10') {
+      return 'Oktober';
+    } else if (month == '11') {
+      return 'November';
+    } else if (month == '12') {
+      return 'Desember';
+    }
+    return null;
+  }
+  String _getHari(String day){
+    if (day == 'Monday') {
+      return 'Senin';
+    } else if (day == 'Tuesday') {
+      return 'Selasa';
+    } else if (day == 'Wednesday') {
+      return 'Rabu';
+    } else if (day == 'Thursday') {
+      return 'Kamis';
+    } else if (day == 'Friday') {
+      return 'Jumat';
+    } else if (day == 'Saturday') {
+      return 'Sabtu';
+    } else if (day == 'Sunday') {
+      return 'Minggu';
+    }
+    return null;
+  }
+  @override
+  void initState() {
+    setState(() {
+      _getDate();
+    });
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -152,7 +217,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                             color: Color(0xFFFFFFFF)),
                                       ),
                                       Text(
-                                        'Senin, 1 Maret 2021',
+                                        _dateTimeNow.toString(),
                                         style: TextStyle(
                                             fontSize: 12,
                                             color: Color(0xFFFFFFFF)),
@@ -206,6 +271,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                     ),
                                     child: Image.asset(
                                       'images/shape_blue.png',
+                                      width: 311,
                                     ),
                                   ),
                                   left: -5,

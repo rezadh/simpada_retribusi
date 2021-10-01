@@ -1,8 +1,10 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:simpada/screen/riwayat/transaksi_page.dart';
+
+import 'billing_page.dart';
 
 class RiwayatScreen extends StatefulWidget {
-  const RiwayatScreen({Key? key}) : super(key: key);
 
   @override
   _RiwayatScreenState createState() => _RiwayatScreenState();
@@ -31,294 +33,85 @@ Widget _dash(BuildContext context) {
 }
 
 class _RiwayatScreenState extends State<RiwayatScreen> {
+  TabBar myTabBar = TabBar(
+    labelColor: Colors.black,
+    indicator: BoxDecoration(
+        color: Color(0xFFD0EEFF),
+        border: Border(
+          bottom: BorderSide(color: Color(0xFF2F89E8), width: 2),
+        )),
+    tabs: [
+      Tab(
+        text: 'Transaksi',
+      ),
+      Tab(
+        text: 'Billing',
+      ),
+    ],
+  );
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-
-    return Scaffold(
-      backgroundColor: Color(0xFFF2F2F2),
-      appBar: AppBar(
-        backgroundColor: Color(0xFF2E93E1),
-        centerTitle: true,
-        title: Text(
-          'Riwayat',
-          style: TextStyle(
-            fontFamily: 'poppins regluar',
-            fontSize: 14.0,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-      body: Container(
-        padding: EdgeInsets.only(top: 19, bottom: 19),
-        child: Column(
-          children: [
-            Card(
-              margin: EdgeInsets.only(left: 25, right: 25),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 2,
-              child: Container(
-                padding: EdgeInsets.all(14),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 132,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Jenis Retribusi',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                              Text(
-                                ':',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'Parkir',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'opensans regular',
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF4F4F4F),
-                          ),
-                        ),
-                      ],
-                    ),
-                    _dash(context),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 132,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Penanggung Jawab',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                              Text(
-                                ':',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'Nopi Nurhayati',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'opensans regular',
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF4F4F4F),
-                          ),
-                        ),
-                      ],
-                    ),
-                    _dash(context),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 132,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Lokasi Retribusi',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                              Text(
-                                ':',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'Gedung Mk P3',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'opensans regular',
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF4F4F4F),
-                          ),
-                        ),
-                      ],
-                    ),
-                    _dash(context),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 132,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Waktu Pembayaran',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                              Text(
-                                ':',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              '3 Nov 2020',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontFamily: 'opensans regular',
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF4F4F4F),
-                              ),
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(left: 3.0),
-                              padding: EdgeInsets.all(1.0),
-                              decoration: BoxDecoration(
-                                color: Color(0xFFFFE38C),
-                                borderRadius: BorderRadius.circular(9.0),
-                                // border: Border.all(width: 2, color: Colors.white),
-                              ),
-                              child: Text(
-                                '11:00',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ],
-                    ),
-                    _dash(context),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 132,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Total Nilai Retribusi',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                              Text(
-                                ':',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'Rp 5.000',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'opensans regular',
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF27AE60),
-                          ),
-                        ),
-                      ],
-                    ),
-                    _dash(context),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          width: 132,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Status',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontFamily: 'opensans regular',
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF4F4F4F),
-                                ),
-                              ),
-                              Text(
-                                ':',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Text(
-                          'Lunas',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontFamily: 'opensans regular',
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF27AE60),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+    return MaterialApp(
+      home: DefaultTabController(
+        length: 2,
+        child: Builder(
+          builder: (BuildContext context) {
+            final TabController tabController =
+            DefaultTabController.of(context);
+            tabController.addListener(() {
+              // print(tabController);
+              if (!tabController.indexIsChanging) {}
+            });
+            return Scaffold(
+              appBar: AppBar(
+                centerTitle: true,
+                title: Text(
+                  'Riwayat',
+                  style: TextStyle(
+                    fontFamily: 'poppins regluar',
+                    fontSize: 14.0,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                backgroundColor: Color(0xFF2F89E8),
+                bottom: PreferredSize(
+                  preferredSize: Size.fromHeight(myTabBar.preferredSize.height),
+                  child: Container(
+                    color: Color(0xFFEAF7FF),
+                    child: myTabBar,
+                  ),
                 ),
               ),
-            )
-          ],
+              body: TabBarView(
+                children: [
+                  Navigator(
+                    onGenerateRoute: (settings) {
+                      Widget page = TransaksiPage();
+                      // if (settings.name == 'page2') page = SplashScreen();
+                      return MaterialPageRoute(builder: (_) => page);
+                    },
+                  ),
+                  Navigator(
+                    onGenerateRoute: (settings) {
+                      Widget page = BillingPage();
+                      return MaterialPageRoute(builder: (_) => page);
+                    },
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );
+
   }
 }
+// return Scaffold(
+// appBar: AppBar(
+// backgroundColor: Color(0xFF2E93E1),
+// centerTitle: true,
+//
+// ),
