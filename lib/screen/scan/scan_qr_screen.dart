@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simpada/data/api/api_service.dart';
+import 'package:simpada/data/model/simpada_retribusi.dart';
 import 'package:simpada/screen/scan/preview_scan_screen.dart';
+import 'package:simpada/screen/scan/tagihan_retribusi_screen.dart';
 
 class ScanQRScreen extends StatefulWidget {
   @override
@@ -16,18 +19,24 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
   Barcode result;
   QRViewController controller;
   String _npwrd;
+  List _listNpwrd = [];
+  Future<List<Profile>> _listProfile;
+  String _namaWajibRetribusi;
+  String _username;
   String _jenisRetribusi;
   String _jenisProduk;
-  String _namaWajibRetribusi;
   String _nominalPajak;
   String _periodePenagihan;
   String _lokasiRetribusi;
   String _name;
   String _dateNow;
+  String _alamat;
+  String _noHp;
 
   getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _name = prefs.getString('name');
+    _username = prefs.getString('noHp');
     return _name;
   }
 
@@ -71,23 +80,16 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
     controller.scannedDataStream.listen((scanData) {
       setState(() {
         result = scanData;
-        // var parts = result.code.split('|');
-        // _npwrd = parts[0].trim();
-        // _jenisRetribusi = parts[1].trim();
-        // _jenisProduk = parts[2].trim();
-        // _namaWajibRetribusi = parts[3].trim();
-        // _nominalPajak = parts[4].trim();
-        // _periodePenagihan = parts[5].trim();
-        // _lokasiRetribusi = parts[6].trim();
+
         // print(_npwrd);
         // print(_periodePenagihan);
-        // _getResult();
+        _getResult();
         print(result.code);
       });
     });
   }
 
-  void _getResult() {
+  void _getResult() async {
     // Navigator.pushAndRemoveUntil(
     //   context,
     //   MaterialPageRoute(
@@ -105,22 +107,53 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
     //   ),
     //   (Route<dynamic> route) => false,
     // );
+    // _namaWajibRetribusi = parts[1].trim();
+    // _alamat = parts[2].trim();
+    // _noHp = parts[3].trim();
+    _listNpwrd.clear();
+    var parts = result.code.split('|');
+    _npwrd = parts[0].trim();
+    _jenisRetribusi = parts[1].trim();
+    _jenisProduk = parts[2].trim();
+    _namaWajibRetribusi = parts[3].trim();
+    _nominalPajak = parts[4].trim();
+    _periodePenagihan = parts[5].trim();
+    _lokasiRetribusi = parts[6].trim();
+    _listNpwrd.add(_npwrd);
+    print(_listNpwrd);
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => PreviewScanScreen(
-          npwrd: _npwrd,
-          jenisRetribusi: _jenisRetribusi,
-          jenisProduk: _jenisProduk,
-          namaWajibRetribusi: _namaWajibRetribusi,
-          nominalPajak: _nominalPajak,
-          periodePenagihan: _periodePenagihan,
-          lokasiRetribusi: _lokasiRetribusi,
-          name: _name,
-          dateNow: _dateNow,
+        builder: (context) => TagihanRetribusiScreen(
+          listProfile: _listNpwrd,
+          // npwrd: _npwrd,
+          // alamat: _alamat,
+          // noHp: _noHp,
+          // namaWajibRetribusi: _namaWajibRetribusi,
+          // username: _username,
+          // name: _name,
+          // dateNow: _dateNow,
         ),
       ),
     );
+
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => PreviewScanScreen(
+    //       npwrd: _npwrd,
+    //       jenisRetribusi: _jenisRetribusi,
+    //       jenisProduk: _jenisProduk,
+    //       namaWajibRetribusi: _namaWajibRetribusi,
+    //       nominalPajak: _nominalPajak,
+    //       periodePenagihan: _periodePenagihan,
+    //       lokasiRetribusi: _lokasiRetribusi,
+    //       name: _name,
+    //       dateNow: _dateNow,
+    //     ),
+    //   ),
+    // );
   }
 
   @override

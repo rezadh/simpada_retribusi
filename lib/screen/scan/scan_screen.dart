@@ -104,83 +104,83 @@ class _ScanScreenState extends State<ScanScreen> {
                 ),
               ),
             ),
-            Card(
-              margin: EdgeInsets.only(left: 25, right: 25, top: 25),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15.0),
-              ),
-              elevation: 1,
-              child: Container(
-                width: 311,
-                height: 101,
-                child: Stack(
-                  children: [
-                    Positioned(
-                      child: Image.asset(
-                        'images/shape_pink.png',
-                        width: 311,
-                      ),
-                      top: 50,
-                    ),
-                    Container(
-                      height: 101,
-                      padding: EdgeInsets.symmetric(horizontal: 30),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Image.asset(
-                            'images/input.png',
-                            width: 71,
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Input Retribusi',
-                                style: TextStyle(
-                                  fontFamily: 'poppins regular',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              Flexible(
-                                child: FlatButton(
-                                  color: Colors.white,
-                                  minWidth: 100,
-                                  height: 25,
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(18.0),
-                                      side: BorderSide(
-                                        color: Color(0xFF2E8DE5),
-                                      )),
-                                  onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            InputRetribusiScreen(),
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                    'Buka',
-                                    style: TextStyle(
-                                      color: Color(0xFF2E8DE5),
-                                      fontFamily: 'poppins regular',
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            )
+            // Card(
+            //   margin: EdgeInsets.only(left: 25, right: 25, top: 25),
+            //   shape: RoundedRectangleBorder(
+            //     borderRadius: BorderRadius.circular(15.0),
+            //   ),
+            //   elevation: 1,
+            //   child: Container(
+            //     width: 311,
+            //     height: 101,
+            //     child: Stack(
+            //       children: [
+            //         Positioned(
+            //           child: Image.asset(
+            //             'images/shape_pink.png',
+            //             width: 311,
+            //           ),
+            //           top: 50,
+            //         ),
+            //         Container(
+            //           height: 101,
+            //           padding: EdgeInsets.symmetric(horizontal: 30),
+            //           child: Row(
+            //             crossAxisAlignment: CrossAxisAlignment.center,
+            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //             children: [
+            //               Image.asset(
+            //                 'images/input.png',
+            //                 width: 71,
+            //               ),
+            //               Column(
+            //                 mainAxisAlignment: MainAxisAlignment.center,
+            //                 children: [
+            //                   Text(
+            //                     'Input Retribusi',
+            //                     style: TextStyle(
+            //                       fontFamily: 'poppins regular',
+            //                       fontSize: 14,
+            //                       fontWeight: FontWeight.w700,
+            //                     ),
+            //                   ),
+            //                   Flexible(
+            //                     child: FlatButton(
+            //                       color: Colors.white,
+            //                       minWidth: 100,
+            //                       height: 25,
+            //                       shape: RoundedRectangleBorder(
+            //                           borderRadius: BorderRadius.circular(18.0),
+            //                           side: BorderSide(
+            //                             color: Color(0xFF2E8DE5),
+            //                           )),
+            //                       onPressed: () {
+            //                         Navigator.push(
+            //                           context,
+            //                           MaterialPageRoute(
+            //                             builder: (context) =>
+            //                                 InputRetribusiScreen(),
+            //                           ),
+            //                         );
+            //                       },
+            //                       child: Text(
+            //                         'Buka',
+            //                         style: TextStyle(
+            //                           color: Color(0xFF2E8DE5),
+            //                           fontFamily: 'poppins regular',
+            //                         ),
+            //                       ),
+            //                     ),
+            //                   ),
+            //                 ],
+            //               )
+            //             ],
+            //           ),
+            //         )
+            //       ],
+            //     ),
+            //   ),
+            // )
           ],
         ),
       ),

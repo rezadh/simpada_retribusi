@@ -1,5 +1,6 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
+import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 import 'package:simpada/screen/riwayat/transaksi_page.dart';
 
 import 'billing_page.dart';
@@ -66,6 +67,13 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
             });
             return Scaffold(
               appBar: AppBar(
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back_ios),
+                  iconSize: 20.0,
+                  onPressed: () {
+                    _goBack(context);
+                  },
+                ),
                 centerTitle: true,
                 title: Text(
                   'Riwayat',
@@ -108,6 +116,12 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
     );
 
   }
+}
+_goBack(BuildContext context) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => DashboardScreen()),
+  );
 }
 // return Scaffold(
 // appBar: AppBar(

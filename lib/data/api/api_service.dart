@@ -43,7 +43,6 @@ Future<Registration> postRegistration(String code) async {
 
 Future<GenerateToken> getToken(String username, String password) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  var api = prefs.getString('apikey');
   DateTime dateNow = DateTime.now();
   var date = DateFormat("yyyy-MM-dd").format(dateNow);
   var time = DateFormat("HH:mm:ss.sss").format(dateNow);
@@ -107,7 +106,7 @@ Future<Login> postRequestLogin(String username, String password) async {
 }
 
 Future<CollectTax> postCollectTax(
-    String username, String password, Map body) async {
+    String username, Map body) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   var api = prefs.getString('apikey');
   DateTime dateNow = DateTime.now();
@@ -129,16 +128,15 @@ Future<CollectTax> postCollectTax(
   };
   Map b = {
     'npwrd': body['npwrd'],
-    'tgl_pungut': body['tanggal_penagihan'],
-    'nominal': body['nominal'],
-    'periode': body['periode'],
-    'jumlah_bayar_maju': body['jumlah_bayar'],
-    'satuan_periode': body['satuan_periode'],
-    'username': username
+    'tgl_pungut': body['tgl_pungut'],
+    'total_setor_pajak_retribusi': body['total_setor_pajak_retribusi'],
+    'objek_retribusi': body['objek_retribusi'],
+    'username': body['username'],
   };
   print(b);
   var response =
       await http.post(Uri.parse(url), headers: h, body: json.encode(b));
+  print(response.statusCode);
   if (response.statusCode == 200 || response.statusCode == 201) {
     print(response.body);
     return CollectTax.fromJson(json.decode(response.body));
@@ -212,6 +210,109 @@ Future<BillCode> postRequestBillCode(List billCode) async {
     var responseJson = json.decode(response.body);
     print(responseJson);
     return BillCode.fromJson(json.decode(response.body));
+  } else {
+    print(response.body);
+    return null;
+  }
+}
+Future<List<Profile>> postRequestProfile(List npwrd) async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var api = prefs.getString('apikey');
+  DateTime dateNow = DateTime.now();
+  var token = prefs.getString('token');
+  var noHp = prefs.getString('noHp');
+  var date = DateFormat("yyyy-MM-dd").format(dateNow);
+  var time = DateFormat("HH:mm:ss.sss").format(dateNow);
+  var clientTime = DateFormat('dd-MM-yyyy HH:mm:ss').format(dateNow);
+  String timeStamp = date + 'T' + time + 'Z';
+  var _signature = utf8.encode('$noHp:$timeStamp');
+  var key = utf8.encode(api);
+  var hmacSha256 = Hmac(sha256, key);
+  Digest digest = hmacSha256.convert(_signature);
+  String url = BaseUrl + 'retribusi/wr/profile';
+  Map<String, String> h = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+    'Timestamp': timeStamp,
+    'Signature': digest.toString(),
+  };
+  List jsonList = npwrd;
+  Map b = {'npwrd': jsonList, 'tgl_request': clientTime, 'username': noHp};
+  var response =
+  await http.post(Uri.parse(url), headers: h, body: json.encode(b));
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    List responseJson = json.decode(response.body)['daftar_wr'];
+    print(responseJson);
+    return responseJson.map((e) => Profile.fromJson(e)).toList();
+  } else {
+    print(response.body);
+    return null;
+  }
+}
+
+Future<HistoryBill> postRequestHistoryBill() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var api = prefs.getString('apikey');
+  DateTime dateNow = DateTime.now();
+  var token = prefs.getString('token');
+  var noHp = prefs.getString('noHp');
+  var billingCode = prefs.getString('billcode');
+  var date = DateFormat("yyyy-MM-dd").format(dateNow);
+  var time = DateFormat("HH:mm:ss.sss").format(dateNow);
+  String timeStamp = date + 'T' + time + 'Z';
+  var _signature = utf8.encode('$noHp:$timeStamp');
+  var key = utf8.encode(api);
+  var hmacSha256 = Hmac(sha256, key);
+  Digest digest = hmacSha256.convert(_signature);
+  String url = BaseUrl + 'retribusi/billcode/status';
+  Map<String, String> h = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+    'Timestamp': timeStamp,
+    'Signature': digest.toString(),
+  };
+  Map b = {'username': noHp, 'billing_code': billingCode};
+  var response =
+  await http.post(Uri.parse(url), headers: h, body: json.encode(b));
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    var responseJson = json.decode(response.body);
+    print(responseJson);
+    return HistoryBill.fromJson(json.decode(response.body));
+  } else {
+    print(response.body);
+    return null;
+  }
+}
+
+Future<List<LastPayment>> postRequestLastPayment() async{
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  var api = prefs.getString('apikey');
+  DateTime dateNow = DateTime.now();
+  var token = prefs.getString('token');
+  var noHp = prefs.getString('noHp');
+  var npwrd = prefs.getString('npwrd');
+  var date = DateFormat("yyyy-MM-dd").format(dateNow);
+  var time = DateFormat("HH:mm:ss.sss").format(dateNow);
+  var clientTime = DateFormat('dd-MM-yyyy HH:mm:ss').format(dateNow);
+  String timeStamp = date + 'T' + time + 'Z';
+  var _signature = utf8.encode('$noHp:$timeStamp');
+  var key = utf8.encode(api);
+  var hmacSha256 = Hmac(sha256, key);
+  Digest digest = hmacSha256.convert(_signature);
+  String url = BaseUrl + 'retribusi/lastpayment';
+  Map<String, String> h = {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer $token',
+    'Timestamp': timeStamp,
+    'Signature': digest.toString(),
+  };
+  Map b = {'tgl': clientTime, 'username': noHp, 'npwrd': npwrd};
+  var response =
+  await http.post(Uri.parse(url), headers: h, body: json.encode(b));
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    List responseJson = json.decode(response.body)['daftar'];
+    print(responseJson);
+    return responseJson.map((e) => LastPayment.fromJson(e)).toList();
   } else {
     print(response.body);
     return null;

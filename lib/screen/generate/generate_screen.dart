@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
 import 'package:simpada/screen/generate/generate_code_screen.dart';
@@ -19,83 +20,77 @@ class _GenerateScreenState extends State<GenerateScreen> {
   final selectedNilai = [];
   List<bool> checkBoxValues;
   BillCode _billCode;
+
   _getDateFormat(String date) {
     DateTime dateParse = DateFormat('dd-MM-yy').parse(date);
     String dateFormat = DateFormat('dd-MM-yy').format(dateParse);
     return dateFormat;
   }
-  void _checkData(){
-    if(!selectedNTRD.contains(selectedNTRD)){
-      AlertDialog(
-        actions: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              crossAxisAlignment:
-              CrossAxisAlignment.center,
-              mainAxisAlignment:
-              MainAxisAlignment.start,
-              children: [
-                Container(
-                  width: 92,
-                  height: 92,
-                  alignment: Alignment.center,
-                  // padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                      color: Color(0xFFEB5252),
-                      borderRadius:
-                      BorderRadius.circular(
-                          50),
-                      border: Border.all(
-                          width: 2,
-                          color: Colors.white)),
-                  child: FaIcon(
+
+  void _checkData() {
+    if (selectedNTRD.isEmpty) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          actions: [
+            Container(
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  FaIcon(
                     FontAwesomeIcons.timesCircle,
-                    size: 50,
-                    color: Colors.white,
+                    size: 90,
+                    color: Colors.red,
                   ),
-                ),
-                SizedBox(height: 12),
-                Text(
-                  'Silahkan pilih NTRD',
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF252B42),
-                      fontFamily:
-                      'opensans regular'),
-                ),
-                SizedBox(
-                  height: 5,
-                ),
-                SizedBox(
-                  height: 11,
-                ),
-              ],
+                  SizedBox(height: 12),
+                  Text(
+                    'Silahkan pilih NTRD terlebih dahulu',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF252B42),
+                        fontFamily: 'opensans regular'),
+                  ),
+                  SizedBox(
+                    height: 5,
+                  ),
+                  SizedBox(
+                    height: 11,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       );
-    }else{
+    } else {
       _postBillCode();
     }
   }
+
   void _postBillCode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    DateTime dateNow = DateTime.now();
     await postRequestBillCode(selectedNTRD).then((value) {
       if (value != null) {
         _billCode = value;
         var _billingCode = _billCode.billCode;
         var _tanggalKadaluarsa = _billCode.tanggalKadaluarsa;
+        var clientTime = DateFormat('dd-MM-yyyy').format(dateNow);
+        prefs.setString('billcode', _billingCode);
+        prefs.setString('tanggal_bayar', clientTime);
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                GenerateCodeScreen(
-                  ntrd: selectedNTRD,
-                  nilai: selectedNilai,
-                  billingCode: _billingCode,
-                  tanggalKadaluarsa: _tanggalKadaluarsa,
-                ),
+            builder: (context) => GenerateCodeScreen(
+              ntrd: selectedNTRD,
+              nilai: selectedNilai,
+              billingCode: _billingCode,
+              tanggalKadaluarsa: _tanggalKadaluarsa,
+            ),
           ),
         );
         return;
@@ -116,9 +111,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery
-        .of(context)
-        .size;
+    final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color(0xFF2E93E1),
@@ -200,7 +193,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                           width: 110,
                                           child: ListView.builder(
                                             physics:
-                                            NeverScrollableScrollPhysics(),
+                                                NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
                                             itemCount: data.length,
                                             itemBuilder: (BuildContext context,
@@ -213,11 +206,11 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                        'opensans regular',
+                                                            'opensans regular',
                                                         fontWeight:
-                                                        FontWeight.w400,
+                                                            FontWeight.w400,
                                                         color:
-                                                        Color(0xFF757F8C),
+                                                            Color(0xFF757F8C),
                                                       ),
                                                     ),
                                                     SizedBox(height: 10),
@@ -247,7 +240,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                           width: 50,
                                           child: ListView.builder(
                                             physics:
-                                            NeverScrollableScrollPhysics(),
+                                                NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
                                             itemCount: data.length,
                                             itemBuilder: (BuildContext context,
@@ -257,16 +250,16 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                   children: [
                                                     Text(
                                                       _getDateFormat(data[index]
-                                                          .tanggalPenagihan)
+                                                              .tanggalPenagihan)
                                                           .toString(),
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                        'opensans regular',
+                                                            'opensans regular',
                                                         fontWeight:
-                                                        FontWeight.w400,
+                                                            FontWeight.w400,
                                                         color:
-                                                        Color(0xFF757F8C),
+                                                            Color(0xFF757F8C),
                                                       ),
                                                     ),
                                                     SizedBox(height: 10),
@@ -296,7 +289,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                           width: 55,
                                           child: ListView.builder(
                                             physics:
-                                            NeverScrollableScrollPhysics(),
+                                                NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
                                             itemCount: data.length,
                                             itemBuilder: (BuildContext context,
@@ -306,21 +299,21 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                   children: [
                                                     Text(
                                                       NumberFormat
-                                                          .simpleCurrency(
-                                                          locale: 'id',
-                                                          decimalDigits:
-                                                          0)
+                                                              .simpleCurrency(
+                                                                  locale: 'id',
+                                                                  decimalDigits:
+                                                                      0)
                                                           .format(int.parse(
-                                                          data[index]
-                                                              .nominal)),
+                                                              data[index]
+                                                                  .nominal)),
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                        'opensans regular',
+                                                            'opensans regular',
                                                         fontWeight:
-                                                        FontWeight.w400,
+                                                            FontWeight.w400,
                                                         color:
-                                                        Color(0xFF757F8C),
+                                                            Color(0xFF757F8C),
                                                       ),
                                                     ),
                                                     SizedBox(height: 10),
@@ -360,21 +353,21 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                   });
                                                   if (checked) {
                                                     for (int i = 0;
-                                                    i < data.length;
-                                                    i++) {
-                                                      selectedNTRD.add(
-                                                          data[i].ntrd);
-                                                      selectedNilai.add(data[i]
-                                                          .nominal);
+                                                        i < data.length;
+                                                        i++) {
+                                                      selectedNTRD
+                                                          .add(data[i].ntrd);
+                                                      selectedNilai
+                                                          .add(data[i].nominal);
                                                     }
                                                   } else {
                                                     for (int i = 0;
-                                                    i < data.length;
-                                                    i++) {
-                                                      selectedNTRD.remove(
-                                                          data[i].ntrd);
-                                                      selectedNilai.remove(data[i]
-                                                          .nominal);
+                                                        i < data.length;
+                                                        i++) {
+                                                      selectedNTRD
+                                                          .remove(data[i].ntrd);
+                                                      selectedNilai.remove(
+                                                          data[i].nominal);
                                                     }
                                                     selectedNilai.clear();
                                                     selectedNTRD.clear();
@@ -390,7 +383,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                           width: 20,
                                           child: ListView.builder(
                                             physics:
-                                            NeverScrollableScrollPhysics(),
+                                                NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
                                             itemCount: data.length,
                                             itemBuilder: (BuildContext context,
@@ -398,7 +391,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                               return Container(
                                                 child: Column(
                                                   mainAxisSize:
-                                                  MainAxisSize.min,
+                                                      MainAxisSize.min,
                                                   children: [
                                                     SizedBox(
                                                       height: 10.0,
@@ -418,52 +411,53 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                               print(data[index]
                                                                   .selected);
                                                               data[index]
-                                                                  .selected =
+                                                                      .selected =
                                                                   value;
                                                               // if (!value) {
-                                                                final check = data
-                                                                    .every(
-                                                                        (
-                                                                        element) =>
-                                                                    element
-                                                                        .selected);
-                                                                checked = check;
-                                                                print(checked);
+                                                              final check = data
+                                                                  .every((element) =>
+                                                                      element
+                                                                          .selected);
+                                                              checked = check;
+                                                              print(checked);
                                                               // }
 
                                                               if (!data[index]
                                                                   .selected) {
                                                                 selectedIndexes
                                                                     .remove(
-                                                                    index);
+                                                                        index);
                                                                 selectedNTRD
-                                                                    .remove(
-                                                                    data[
-                                                                    index]
+                                                                    .remove(data[
+                                                                            index]
                                                                         .ntrd);
                                                                 selectedNilai
-                                                                    .remove(data[index].nominal);
+                                                                    .remove(data[
+                                                                            index]
+                                                                        .nominal);
                                                               } else {
-                                                                selectedNTRD
-                                                                    .add(
+                                                                selectedNTRD.add(
                                                                     data[index]
                                                                         .ntrd);
-                                                                selectedNilai.add(data[index].nominal);
+                                                                selectedNilai.add(
+                                                                    data[index]
+                                                                        .nominal);
                                                               }
                                                               selectedNTRD.sort(
-                                                                      (a, b) =>
-                                                                      a
-                                                                          .compareTo(
+                                                                  (a, b) => a
+                                                                      .compareTo(
                                                                           b));
-                                                              selectedNilai.sort((a, b) => a
-                                                                          .compareTo(
+                                                              selectedNilai.sort(
+                                                                  (a, b) => a
+                                                                      .compareTo(
                                                                           b));
                                                               selectedIndexes
                                                                   .sort((a,
-                                                                  b) =>
-                                                                  a.compareTo(
-                                                                      b));
-                                                              print(selectedNTRD);
+                                                                          b) =>
+                                                                      a.compareTo(
+                                                                          b));
+                                                              print(
+                                                                  selectedNTRD);
                                                               // print(
                                                               //     selectedIndexes);
                                                               // print(
@@ -488,7 +482,25 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                   ],
                                 );
                               } else if (snapshot.hasError) {
-                                return Text('${snapshot.error}');
+                                return Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 20),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      SizedBox(height: 47),
+                                      Image.asset('images/connection_lost.png'),
+                                      Text(
+                                        'Jaringan Tidak Tersedia. Mohon Periksa Koneksi Anda',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontSize: 18),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              } else {
+                                return Text('Data Tidak ditemukan');
                               }
                               // else if(!snapshot.hasData){
                               //   return Text('Data Not Found');

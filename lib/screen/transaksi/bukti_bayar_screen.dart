@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 
@@ -102,19 +103,21 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
     // final bytes = Io.File("images/logo.png").readAsBytesSync();
     // String base64Encode(List bytes) => base64.encode(bytes);
     List<String> items = [
-      'NPWRD            :12345678901234',
+      'NPWRD            :$_npwrd',
       'Wajib Retribusi  :$_namaWajibRetribusi',
       'Jenis Retribusi  :$_jenisRetribusi',
       'Jenis produk     :$_jenisProduk',
+      'Penanggung Jawab :$_name',
       'Periode Penagihan:$_periodePenagihan',
       'Tanggal Penagihan:$_tanggalPenagihan',
-      'Penanggung Jawab :$_name',
-      'Lokasi Retribusi :$_lokasiRetribusi',
-      'Nilai Retribusi  :$_nominalPajak',
-      '-------------------------------',
-      'Dibayarkan        $_dibayarkan kali',
-      'Total Retribusi  :$_totalNilai',
       'Periode Bayar    :$_periodeBayar',
+      'Lokasi Retribusi :$_lokasiRetribusi',
+      'Nilai Retribusi  :${NumberFormat
+          .simpleCurrency(
+          locale: 'id',
+          decimalDigits: 0)
+          .format(int.parse(_nominalPajak))
+          .toString()}',
     ];
     Map data = {
       'title': 'BUKTI PEMBAYARAN',
@@ -361,6 +364,39 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   width: 135,
                                   child: Row(
                                     mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Penanggung Jawab',
+                                        style: TextStyle(
+                                            color: Color(0xFF757F8C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                      Text(':'),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  _name.toString(),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'opensans regular'),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 11,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 135,
+                                  child: Row(
+                                    mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
@@ -427,10 +463,10 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   width: 135,
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Penanggung Jawab',
+                                        'Periode Bayar',
                                         style: TextStyle(
                                             color: Color(0xFF757F8C),
                                             fontSize: 14,
@@ -442,9 +478,9 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   ),
                                 ),
                                 Text(
-                                  _name.toString(),
+                                  _periodeBayar.toString(),
                                   style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                       fontFamily: 'opensans regular'),
                                 ),
@@ -508,7 +544,12 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   ),
                                 ),
                                 Text(
-                                  _nominalPajak.toString(),
+                                  NumberFormat
+                                      .simpleCurrency(
+                                      locale: 'id',
+                                      decimalDigits: 0)
+                                      .format(int.parse(_nominalPajak))
+                                      .toString(),
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -517,126 +558,14 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                               ],
                             ),
                             _dash(context),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 135,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Dibayarkan',
-                                        style: TextStyle(
-                                            color: Color(0xFF757F8C),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(_dibayarkan.toString()),
-                                    SizedBox(
-                                      width: 15,
-                                    ),
-                                    Text(
-                                      'Kali',
-                                      style: TextStyle(
-                                          color: Color(0xFF757F8C),
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w400,
-                                          fontFamily: 'opensans regular'),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 135,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Total Nilai Retribusi',
-                                        style: TextStyle(
-                                            color: Color(0xFF757F8C),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                      Text(':'),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  _totalNilai.toString(),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'opensans regular'),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 5,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 135,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Periode Bayar',
-                                        style: TextStyle(
-                                            color: Color(0xFF757F8C),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                      Text(':'),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  _periodeBayar.toString(),
-                                  style: TextStyle(
-                                      color: Color(0xFF757F8C),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'opensans regular'),
-                                ),
-                              ],
-                            ),
                             SizedBox(
                               height: 13,
                             ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Image.asset(
-                                  'images/bank_sulselbar.png',
-                                  width: 100,
-                                ),
-                                Image.asset(
-                                  'images/logo.png',
-                                  width: 110,
-                                ),
-                              ],
+                            Center(
+                              child: Image.asset(
+                                'images/logo.png',
+                                width: 110,
+                              ),
                             ),
                           ],
                         ),
