@@ -72,7 +72,7 @@ class _TagihanRetribusiScreenState extends State<TagihanRetribusiScreen> {
     //   _username = widget.username;
     //   _dateNow = widget.dateNow;
   }
-
+//TODO jenis retribusi masih statis
   String _jenisRetribusi(int index) {
     if (index == 0) {
       return 'Pasar';

@@ -16,6 +16,7 @@ class TransaksiScreen extends StatefulWidget {
   final totalNilai;
   final dibayarkan;
   final periodeBayar;
+  final tempatRetribusi;
 
   TransaksiScreen(
       {this.npwrd,
@@ -28,7 +29,9 @@ class TransaksiScreen extends StatefulWidget {
       this.name,
       this.tanggalPenagihan,
       this.totalNilai,
-      this.dibayarkan, this.periodeBayar});
+      this.dibayarkan,
+      this.periodeBayar,
+      this.tempatRetribusi});
 
   @override
   _TransaksiScreenState createState() => _TransaksiScreenState();
@@ -46,6 +49,7 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
   String _name;
   String _dibayarkan;
   String _periodeBayar;
+  String _tempatRetribusi;
   var _tanggalPenagihan;
 
   void getWidgetData() {
@@ -61,7 +65,7 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
     _totalNilai = widget.totalNilai;
     _tanggalPenagihan = widget.tanggalPenagihan;
     _periodeBayar = widget.periodeBayar;
-
+    _tempatRetribusi = widget.tempatRetribusi;
   }
 
   @override
@@ -279,10 +283,10 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
                                   width: 135,
                                   child: Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Penanggung Jawab',
+                                        'Kolektor',
                                         style: TextStyle(
                                             color: Color(0xFF757F8C),
                                             fontSize: 14,
@@ -345,73 +349,7 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
                                   width: 135,
                                   child: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Tanggal Penagihan',
-                                        style: TextStyle(
-                                            color: Color(0xFF757F8C),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                      Text(':'),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  _tanggalPenagihan.toString(),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'opensans regular'),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 11,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 135,
-                                  child: Row(
-                                    mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Periode Bayar',
-                                        style: TextStyle(
-                                            color: Color(0xFF757F8C),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                      Text(':'),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  _periodeBayar.toString(),
-                                  style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'opensans regular'),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 11,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 135,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Lokasi Retribusi',
@@ -447,6 +385,106 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
+                                        'Tempat Retribusi',
+                                        style: TextStyle(
+                                            color: Color(0xFF757F8C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                      Text(':'),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  _tempatRetribusi.toString(),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'opensans regular'),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 11,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 135,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Tanggal Penagihan',
+                                        style: TextStyle(
+                                            color: Color(0xFF757F8C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                      Text(':'),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  _tanggalPenagihan.toString(),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'opensans regular'),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 11,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 135,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Periode Bayar',
+                                        style: TextStyle(
+                                            color: Color(0xFF757F8C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                      Text(':'),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  _periodeBayar.toString(),
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'opensans regular'),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 11,
+                            ),
+
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 135,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
                                         'Nilai Retribusi',
                                         style: TextStyle(
                                             color: Color(0xFF757F8C),
@@ -459,12 +497,10 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
                                   ),
                                 ),
                                 Text(
-                                    NumberFormat
-                                        .simpleCurrency(
-                                        locale: 'id',
-                                        decimalDigits: 0)
-                                        .format(int.parse(_nominalPajak))
-                                        .toString(),
+                                  NumberFormat.simpleCurrency(
+                                          locale: 'id', decimalDigits: 0)
+                                      .format(int.parse(_nominalPajak))
+                                      .toString(),
                                   style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
@@ -516,8 +552,8 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
                           jenisProduk: _jenisProduk,
                           jenisRetribusi: _jenisRetribusi,
                           lokasiRetribusi: _lokasiRetribusi,
-                          namaWajibRetribusi:
-                          _namaWajibRetribusi,
+                          namaWajibRetribusi: _namaWajibRetribusi,
+                          tempatRetribusi: _tempatRetribusi,
                           name: _name,
                           periodePenagihan: _periodePenagihan,
                           totalNilai: _totalNilai,
@@ -537,7 +573,9 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 29,),
+              SizedBox(
+                height: 29,
+              ),
             ],
           ),
         ),

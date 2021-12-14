@@ -90,6 +90,7 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
   }
 
   void _getResult() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     // Navigator.pushAndRemoveUntil(
     //   context,
     //   MaterialPageRoute(
@@ -121,6 +122,7 @@ class _ScanQRScreenState extends State<ScanQRScreen> {
     _lokasiRetribusi = parts[6].trim();
     _listNpwrd.add(_npwrd);
     print(_listNpwrd);
+    prefs.setString('npwrd',_npwrd);
 
     Navigator.pushReplacement(
       context,

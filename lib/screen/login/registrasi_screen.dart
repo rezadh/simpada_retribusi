@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
+import 'package:simpada/screen/login/login_screen.dart';
 
 class RegistrasiScreen extends StatefulWidget {
   @override
@@ -12,24 +13,24 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
   TextEditingController registrasiController = TextEditingController();
   var _registrasi;
 
-  Future _postRegister() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await postRegistration( _registrasi).then((value) {
-      if (value != null) {
-        setState(() {
-          prefs.setString('code', registrasiController.text);
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DashboardScreen(),
-            ),
-          );
-        });
-      } else {
-        showPop('Registrasi Kode', 'Kode registrasi salah');
-      }
-    });
-  }
+  // Future _postRegister() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   await postRegistration( _registrasi).then((value) {
+  //     if (value != null) {
+  //       setState(() {
+  //         prefs.setString('code', registrasiController.text);
+  //         Navigator.pushReplacement(
+  //           context,
+  //           MaterialPageRoute(
+  //             builder: (context) => LoginScreen(),
+  //           ),
+  //         );
+  //       });
+  //     } else {
+  //       showPop('Registrasi Kode', 'Kode registrasi salah');
+  //     }
+  //   });
+  // }
 
   Future<bool> showPop(String title, String message) => showDialog(
         context: context,
@@ -150,7 +151,7 @@ class _RegistrasiScreenState extends State<RegistrasiScreen> {
                     borderRadius: BorderRadius.circular(18.0),
                   ),
                   onPressed: () {
-                    _postRegister();
+                    // _postRegister();
                   },
                   child: Text(
                     'Masuk',

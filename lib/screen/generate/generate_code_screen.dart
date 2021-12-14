@@ -82,18 +82,18 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF2E93E1),
-        centerTitle: true,
-        title: Text(
-          'Generate',
-          style: TextStyle(
-            fontFamily: 'poppins regluar',
-            fontSize: 14.0,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Color(0xFF2E93E1),
+      //   centerTitle: true,
+      //   title: Text(
+      //     'Generate',
+      //     style: TextStyle(
+      //       fontFamily: 'poppins regluar',
+      //       fontSize: 14.0,
+      //     ),
+      //     textAlign: TextAlign.center,
+      //   ),
+      // ),
       body: Container(
         width: size.width,
         height: size.height,
@@ -264,12 +264,15 @@ class _GenerateCodeScreenState extends State<GenerateCodeScreen> {
                     borderRadius: BorderRadius.circular(37.0),
                   ),
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => DashboardScreen(),
-                      ),
+                    Navigator.of(context, rootNavigator: true).push(
+                      MaterialPageRoute(builder: (context) => DashboardScreen()),
                     );
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => DashboardScreen(),
+                    //   ),
+                    // );
                   },
                   child: Text(
                     'Kembali ke Beranda',

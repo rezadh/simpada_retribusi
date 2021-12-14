@@ -1,16 +1,12 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simpada/data/api/api_service.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 
-import '../../constants.dart';
-
 class BuktiBayarRiwayatScreen extends StatefulWidget {
+  final ntrd;
   final npwrd;
   final jenisRetribusi;
   final jenisProduk;
@@ -18,6 +14,7 @@ class BuktiBayarRiwayatScreen extends StatefulWidget {
   final nominalPajak;
   final periodePenagihan;
   final lokasiRetribusi;
+  final tempatRetribusi;
   final name;
   final tanggalPenagihan;
   final totalNilai;
@@ -30,13 +27,15 @@ class BuktiBayarRiwayatScreen extends StatefulWidget {
   final status;
 
   BuktiBayarRiwayatScreen(
-      {this.npwrd,
+      {this.ntrd,
+      this.npwrd,
       this.jenisRetribusi,
       this.jenisProduk,
       this.namaWajibRetribusi,
       this.nominalPajak,
       this.periodePenagihan,
       this.lokasiRetribusi,
+      this.tempatRetribusi,
       this.name,
       this.tanggalPenagihan,
       this.totalNilai,
@@ -54,42 +53,28 @@ class BuktiBayarRiwayatScreen extends StatefulWidget {
 }
 
 class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
+  String _ntrd;
   String _npwrd;
   String _jenisRetribusi;
-  String _jenisProduk;
-  String _namaWajibRetribusi;
   String _nominalPajak;
-  String _periodePenagihan;
-  String _lokasiRetribusi;
-  String _totalNilai;
   String _name;
-  String _dibayarkan;
   String _periodeBayar;
   var _tanggalPenagihan;
-  int _valueValidation = 0;
-  String _kodeBiling;
-  String _kadaluarsa;
-  String _tanggalBayar;
   String _status;
-  String _namaRetribusi;
+  List<dynamic> _listNpwrd = [];
 
   void getWidgetData() {
+    _jenisRetribusi = 'Pasar';
+    _ntrd = widget.ntrd;
     _npwrd = widget.npwrd;
-    _jenisRetribusi = widget.jenisRetribusi;
-    _jenisProduk = widget.jenisProduk;
-    _namaWajibRetribusi = widget.namaWajibRetribusi;
+    _listNpwrd.clear();
+    _listNpwrd.add(widget.npwrd);
     _nominalPajak = widget.nominalPajak;
-    _periodePenagihan = widget.periodePenagihan;
-    _lokasiRetribusi = widget.lokasiRetribusi;
-    _dibayarkan = widget.dibayarkan;
     _name = widget.name;
-    _totalNilai = widget.totalNilai;
     _tanggalPenagihan = widget.tanggalPenagihan;
     _periodeBayar = widget.periodeBayar;
-    _kodeBiling = widget.kodeBilling;
-    _kadaluarsa = widget.kadaluarsa;
-    _tanggalBayar = widget.tanggalBayar;
     _status = widget.status;
+    print(_listNpwrd);
   }
 
   Future<bool> showPop(String title, String message) => showDialog(
@@ -115,23 +100,57 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
         ),
       );
 
+  getUser() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var nama = prefs.getString('name');
+    return nama;
+  }
+
   @override
   void initState() {
-    getWidgetData();
+    getUser().then((id) {
+      setState(() {
+        _name = id;
+        getWidgetData();
+      });
+    });
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return _npwrd != null
-        ? Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: Color(0xFFFFFFFF),
-            body: Container(
-              height: size.height,
-              child: SingleChildScrollView(
-                child: Column(
+    return Scaffold(
+      appBar: AppBar(
+        // leading: IconButton(
+        //   icon: Icon(Icons.arrow_back_ios),
+        //   iconSize: 20.0,
+        //   onPressed: () {
+        //     _goBack(context);
+        //   },
+        // ),
+        centerTitle: true,
+        title: Text(
+          'Riwayat',
+          style: TextStyle(
+            fontFamily: 'poppins regluar',
+            fontSize: 14.0,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+      resizeToAvoidBottomInset: false,
+      backgroundColor: Color(0xFFFFFFFF),
+      body: Container(
+        height: size.height,
+        child: SingleChildScrollView(
+          child: FutureBuilder<List<Profile>>(
+            future: postRequestProfile(_listNpwrd),
+            builder: (context, snapshot) {
+              if (snapshot.hasData) {
+                List<Profile> data = snapshot.data;
+                print('ini nama wr ${data[0].namaWr}');
+                return Column(
                   children: [
                     Container(
                       width: size.width,
@@ -168,6 +187,39 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
                                     Icons.qr_code_2,
                                     size: 78,
                                   ),
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Container(
+                                        width: 135,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Text(
+                                              'NTRD',
+                                              style: TextStyle(
+                                                  color: Color(0xFF757F8C),
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w400,
+                                                  fontFamily:
+                                                      'opensans regular'),
+                                            ),
+                                            Text(':'),
+                                          ],
+                                        ),
+                                      ),
+                                      Text(
+                                        _ntrd.toString(),
+                                        style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.w600,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: 11),
                                   Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
@@ -225,7 +277,7 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
                                         ),
                                       ),
                                       Text(
-                                        _namaWajibRetribusi.toString(),
+                                        data[0].namaWr,
                                         style: TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w600,
@@ -236,285 +288,445 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
                                   SizedBox(
                                     height: 11,
                                   ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                  FutureBuilder<List<DaftarProdukAtas>>(
+                                    future: postRequestProduk(_npwrd),
+                                    builder: (context, snapshot) {
+                                      if (snapshot.hasData) {
+                                        List<DaftarProdukAtas> dataRetribusi =
+                                            snapshot.data;
+                                        return Column(
                                           children: [
-                                            Text(
-                                              'Jenis Retribusi',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Jenis Retribusi',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _jenisRetribusi.toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _jenisRetribusi.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Jenis Produk',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            SizedBox(
+                                              height: 11,
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _jenisProduk.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Penanggung Jawab',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Jenis Produk',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  dataRetribusi[0]
+                                                      .lokasi
+                                                      .daftarTempat[0]
+                                                      .daftarProdukBawah[0]
+                                                      .type,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _name.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Periode Penagihan',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            SizedBox(
+                                              height: 11,
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _periodePenagihan.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Tanggal Penagihan',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Kolektor',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _name.toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _tanggalPenagihan.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Periode Bayar',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            SizedBox(
+                                              height: 11,
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _periodeBayar.toString(),
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Lokasi Retribusi',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Periode Penagihan',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  dataRetribusi[0]
+                                                      .lokasi
+                                                      .daftarTempat[0]
+                                                      .daftarProdukBawah[0]
+                                                      .satuanPeriode,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
                                             ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _lokasiRetribusi.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Nilai Retribusi',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
+                                            SizedBox(
+                                              height: 11,
                                             ),
-                                            Text(':'),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Lokasi Retribusi',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  dataRetribusi[0].lokasi.nama,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 11,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Tempat Retribusi',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  dataRetribusi[0].lokasi.daftarTempat[0].nama,
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 11,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Tanggal Penagihan',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _tanggalPenagihan.toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 11,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Periode Bayar',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _periodeBayar.toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 11,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Nilai Retribusi',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  NumberFormat.simpleCurrency(
+                                                          locale: 'id',
+                                                          decimalDigits: 0)
+                                                      .format(double.parse(
+                                                          _nominalPajak))
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                      fontSize: 14,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      fontFamily:
+                                                          'opensans regular'),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(
+                                              height: 11,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Container(
+                                                  width: 135,
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: [
+                                                      Text(
+                                                        'Status',
+                                                        style: TextStyle(
+                                                            color: Color(
+                                                                0xFF757F8C),
+                                                            fontSize: 14,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            fontFamily:
+                                                                'opensans regular'),
+                                                      ),
+                                                      Text(':'),
+                                                    ],
+                                                  ),
+                                                ),
+                                                Text(
+                                                  _status == '1'
+                                                      ? 'Belum Generate Billing'
+                                                      : 'Sudah Generate Billing',
+                                                  style: TextStyle(
+                                                    fontSize: 12,
+                                                    fontFamily:
+                                                        'opensans regular',
+                                                    fontWeight: FontWeight.w600,
+                                                    color: _status == '1'
+                                                        ? Color(0xFFF2994A)
+                                                        : Color(0xFF27AE60),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ],
-                                        ),
-                                      ),
-                                      Text(
-                                        NumberFormat.simpleCurrency(
-                                                locale: 'id', decimalDigits: 0)
-                                            .format(double.parse(_nominalPajak))
-                                            .toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
+                                        );
+                                      } else {
+                                        return Text('');
+                                      }
+                                    },
                                   ),
                                   _dash(context),
                                   SizedBox(
@@ -530,314 +742,40 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(height: 28),
-                        ],
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-          )
-        :
-        //Billing
-        Scaffold(
-            resizeToAvoidBottomInset: false,
-            backgroundColor: Color(0xFFFFFFFF),
-            body: Container(
-              height: size.height,
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                      width: size.width,
-                      child: Column(
-                        children: [
-                          SizedBox(height: 20),
-                          Text(
-                            'Bukti Bayar Transaksi',
-                            style: TextStyle(
-                                color: Color(0xFF3B414B),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                fontFamily: 'opensans regular'),
-                          ),
-                          SizedBox(
-                            height: 23,
-                          ),
-                          Card(
-                            margin: EdgeInsets.only(
-                              left: 25,
-                              right: 25,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(9.0),
-                            ),
-                            elevation: 2,
-                            child: Container(
-                              padding: EdgeInsets.only(
-                                  left: 20, bottom: 23, top: 10, right: 17),
-                              width: size.width,
-                              child: Column(
-                                children: [
-                                  Icon(
-                                    Icons.qr_code_2,
-                                    size: 78,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Kode Billing',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _kodeBiling.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 11),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Penanggung Jawab',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _name.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Tanggal Bayar',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                       _tanggalBayar.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Tanggal Kadaluarsa',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _kadaluarsa.toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Nama Retribusi',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        '-',
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(
-                                    height: 11,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Tagihan',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                      'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        NumberFormat.simpleCurrency(
-                                                locale: 'id', decimalDigits: 0)
-                                            .format(double.parse(_nominalPajak))
-                                            .toString(),
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 11),
-                                  Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Container(
-                                        width: 135,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              'Status',
-                                              style: TextStyle(
-                                                  color: Color(0xFF757F8C),
-                                                  fontSize: 14,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontFamily:
-                                                  'opensans regular'),
-                                            ),
-                                            Text(':'),
-                                          ],
-                                        ),
-                                      ),
-                                      Text(
-                                        _status == '0' ? 'Menunggu Pembayaran' : _status == '1' ? 'Lunas' : 'Expired',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: 'opensans regular',
-                                          fontWeight: FontWeight.w600,
-                                          color: _status == '0' ? Color(0xFFF2994A) :_status == '1' ? Color(0xFF27AE60) : Colors.red,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  _dash(context),
-                                  SizedBox(
-                                    height: 13,
-                                  ),
-                                  Center(
-                                    child: Image.asset(
-                                      'images/logo.png',
-                                      width: 110,
-                                    ),
-                                  ),
-                                ],
+                          SizedBox(height: 22),
+                          Container(
+                            margin: EdgeInsets.only(left: 25, right: 25),
+                            child: MaterialButton(
+                              color: Color(0xFF009A8A),
+                              minWidth: size.width,
+                              height: 45,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(37.0),
+                              ),
+                              onPressed: () {
+                                Navigator.of(context, rootNavigator: true).push(
+                                  MaterialPageRoute(
+                                      builder: (context) => DashboardScreen()),
+                                );
+                                // Navigator.pushReplacement(
+                                //             context,
+                                //             MaterialPageRoute(
+                                //               builder: (context) => DashboardScreen(),
+                                //             ),
+                                //           );
+                                // Navigator.pushAndRemoveUntil(
+                                //   context,
+                                //   MaterialPageRoute(builder: (context) => DashboardScreen()),
+                                //       (route) => false,
+                                // );
+                              },
+                              child: Text(
+                                'Kembali ke Beranda',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontFamily: 'poppins regular',
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
                             ),
                           ),
@@ -846,10 +784,15 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
                       ),
                     )
                   ],
-                ),
-              ),
-            ),
-          );
+                );
+              } else {
+                return Text('');
+              }
+            },
+          ),
+        ),
+      ),
+    );
   }
 }
 

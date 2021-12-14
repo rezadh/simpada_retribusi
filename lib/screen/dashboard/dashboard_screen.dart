@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:intl/intl.dart';
 import 'package:simpada/models/bottom_bar.dart';
-import 'package:simpada/screen/generate/generate_screen.dart';
+import 'package:simpada/screen/generate/daftar_setoran_screen.dart';
+import 'package:simpada/screen/generate/generate_page.dart';
 import 'package:simpada/screen/profile/akun_screen.dart';
 import 'package:simpada/screen/riwayat/riwayat_screen.dart';
+import 'package:simpada/screen/riwayat/transaksi_page.dart';
 import 'package:simpada/screen/scan/scan_screen.dart';
 
 final List<String> imagesList = [
@@ -23,7 +25,6 @@ final List<String> titles = [
 ];
 
 class DashboardScreen extends StatefulWidget {
-
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -36,7 +37,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   var _parseMonth;
   var _dateTimeNow;
   var _parseDay;
-  void _getDate(){
+
+  void _getDate() {
     var dateNow = DateTime.now();
     var day = DateFormat('EEEE').format(dateNow);
     var dayDateNow = DateFormat('dd').format(dateNow);
@@ -46,6 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _parseMonth = getMonth(monthDateNow);
     _dateTimeNow = '$_parseDay, $dayDateNow $_parseMonth $yearDateNow';
   }
+
   String getMonth(String month) {
     if (month == '01') {
       return 'Januari';
@@ -74,7 +77,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     return null;
   }
-  String _getHari(String day){
+
+  String _getHari(String day) {
     if (day == 'Monday') {
       return 'Senin';
     } else if (day == 'Tuesday') {
@@ -92,6 +96,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
     return null;
   }
+
   @override
   void initState() {
     setState(() {
@@ -99,6 +104,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -186,7 +192,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Column(
               children: [
                 Container(
-                  height: 200,
+                  height: 225,
                   child: Stack(
                     children: [
                       Container(
@@ -254,8 +260,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           elevation: 1,
                           child: Container(
-                            height: 72,
-                            width: 311,
+                            height: 101,
+                            width: MediaQuery.of(context).size.width,
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(15),
@@ -266,60 +272,76 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 Positioned(
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.only(
-                                      bottomLeft: Radius.circular(27.0),
-                                      bottomRight: Radius.circular(27.0),
+                                      bottomLeft: Radius.circular(15.0),
                                     ),
-                                    child: Image.asset(
-                                      'images/shape_blue.png',
-                                      width: 311,
-                                    ),
+                                    child: Container(
+                                        width: 311,
+                                        child: Image.asset(
+                                            'images/shape_orange.png')),
                                   ),
-                                  left: -5,
-                                  top: 37,
+                                  top: 50,
                                 ),
-                                Container(
-                                  padding: EdgeInsets.only(left: 20),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(height: 8),
-                                      Text(
-                                        'Daftar Setoran Retribusi',
-                                        style: TextStyle(
-                                            fontSize: 14.0,
-                                            fontFamily: 'poppins regular',
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Flexible(
-                                        child: FlatButton(
-                                          color: Color(0xFF2E8DE5),
-                                          minWidth: 100,
-                                          height: 25,
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18.0),
-                                          ),
-                                          onPressed: () {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) =>
-                                                    GenerateScreen(),
-                                              ),
-                                            );
-                                          },
-                                          child: Text(
-                                            'Masuk',
+                                Positioned(
+                                  top: 18,
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.only(
+                                      bottomLeft: Radius.circular(15.0),
+                                    ),
+                                    child: Container(
+                                        width: 109,
+                                        child: Image.asset('images/clock.png')),
+                                  ),
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Container(
+                                      padding: EdgeInsets.only(right: 16),
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            'Riwayat Penagihan',
                                             style: TextStyle(
+                                                fontSize: 14.0,
+                                                fontFamily: 'poppins regular',
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                          Flexible(
+                                            child: FlatButton(
                                               color: Colors.white,
-                                              fontFamily: 'poppins regular',
+                                              minWidth: 100,
+                                              height: 25,
+                                              shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          18.0),
+                                                  side: BorderSide(
+                                                    color: Color(0xFF2E8DE5),
+                                                  )),
+                                              onPressed: () {
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        TransaksiPage(),
+                                                  ),
+                                                );
+                                              },
+                                              child: Text(
+                                                'Buka',
+                                                style: TextStyle(
+                                                  color: Color(0xFF2E8DE5),
+                                                  fontFamily: 'poppins regular',
+                                                ),
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ),
-                                    ],
-                                  ),
+                                    )
+                                  ],
                                 ),
                               ],
                             ),
@@ -329,15 +351,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ],
                   ),
                 ),
-                // SizedBox(height: 35),
+
+                SizedBox(height: 5),
                 Card(
+                  margin: EdgeInsets.symmetric(horizontal: 25),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15.0),
                   ),
                   elevation: 1,
                   child: Container(
                     height: 101,
-                    width: 300,
+                    width: MediaQuery.of(context).size.width,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
@@ -349,30 +373,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(15.0),
+                              bottomRight: Radius.circular(15.0),
                             ),
-                            child: Container(width: 311,child: Image.asset('images/shape_orange.png')),
+                            child: Container(
+                                width: 300,
+                                child: Image.asset('images/shape_blue.png')),
                           ),
-                          top: 50,
+                          top: 51,
                         ),
                         Positioned(
-                          top: 18,
+                          top: 10,
                           child: ClipRRect(
                             borderRadius: BorderRadius.only(
                               bottomLeft: Radius.circular(15.0),
                             ),
-                            child: Container(width: 109,child: Image.asset('images/clock.png')),
+                            child: Container(
+                                width: 109,
+                                child: Image.asset('images/penyetoran.png')),
                           ),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Container(
-                              padding: EdgeInsets.only(right: 40),
+                              padding: EdgeInsets.only(right: 37),
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    'Riwayat',
+                                    'Penyetoran',
                                     style: TextStyle(
                                         fontSize: 14.0,
                                         fontFamily: 'poppins regular',
@@ -380,28 +409,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   ),
                                   Flexible(
                                     child: FlatButton(
-                                      color: Colors.white,
+                                      color: Color(0xFF2E8DE5),
+
                                       minWidth: 100,
                                       height: 25,
                                       shape: RoundedRectangleBorder(
                                           borderRadius:
                                               BorderRadius.circular(18.0),
                                           side: BorderSide(
-                                            color: Color(0xFF2E8DE5),
+                                            color: Colors.white,
                                           )),
                                       onPressed: () {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
-                                                RiwayatScreen(),
+                                                DaftarSetoranScreen(),
                                           ),
                                         );
                                       },
                                       child: Text(
                                         'Buka',
                                         style: TextStyle(
-                                          color: Color(0xFF2E8DE5),
+                                          color: Colors.white,
                                           fontFamily: 'poppins regular',
                                         ),
                                       ),
@@ -416,11 +446,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                 ),
+                SizedBox(height: 26),
                 CarouselSlider(
                   options: CarouselOptions(
                     autoPlay: true,
                     enlargeCenterPage: true,
-                    height: 130,
+                    height: 176,
                     // scrollDirection: Axis.vertical,
                     onPageChanged: (index, reason) {
                       setState(() {

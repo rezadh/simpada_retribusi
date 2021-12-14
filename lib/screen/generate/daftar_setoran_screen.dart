@@ -1,39 +1,17 @@
-import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
-import 'package:simpada/screen/riwayat/transaksi_page.dart';
+import 'package:simpada/screen/generate/generate_page.dart';
+import 'package:simpada/screen/generate/daftar_billing_page.dart';
+import 'package:simpada/screen/generate/riwayat_penyetoran_page.dart';
 
-import '../generate/riwayat_penyetoran_page.dart';
-
-class RiwayatScreen extends StatefulWidget {
+class DaftarSetoranScreen extends StatefulWidget {
+  const DaftarSetoranScreen({Key key}) : super(key: key);
 
   @override
-  _RiwayatScreenState createState() => _RiwayatScreenState();
+  _DaftarSetoranScreenState createState() => _DaftarSetoranScreenState();
 }
 
-Widget _dash(BuildContext context) {
-  final Size size = MediaQuery.of(context).size;
-  final dashWidth = 10.0;
-  final dashCount = (size.width / (2 * dashWidth)).floor();
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
-    child: Flex(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      direction: Axis.horizontal,
-      children: List.generate(dashCount, (_) {
-        return SizedBox(
-          width: dashWidth,
-          height: 1,
-          child: DecoratedBox(
-            decoration: BoxDecoration(color: Colors.grey),
-          ),
-        );
-      }),
-    ),
-  );
-}
-
-class _RiwayatScreenState extends State<RiwayatScreen> {
+class _DaftarSetoranScreenState extends State<DaftarSetoranScreen> {
   TabBar myTabBar = TabBar(
     labelColor: Colors.black,
     indicator: BoxDecoration(
@@ -43,20 +21,23 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
         )),
     tabs: [
       Tab(
-        text: 'Transaksi',
+        child: Text('Generate Billing', maxLines: 2, textAlign: TextAlign.center,),
+        // text: 'Generate Billing',
       ),
       Tab(
-        text: 'Billing',
+        text: 'Daftar Billing',
+      ),
+      Tab(
+        child: Text('Riwayat Penyetoran', maxLines: 2, textAlign: TextAlign.center,),
       ),
     ],
   );
-
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return MaterialApp(
       home: DefaultTabController(
-        length: 2,
+        length: 3,
         child: Builder(
           builder: (BuildContext context) {
             final TabController tabController =
@@ -76,7 +57,7 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                 ),
                 centerTitle: true,
                 title: Text(
-                  'Riwayat',
+                  'Daftar Setoran Retribusi',
                   style: TextStyle(
                     fontFamily: 'poppins regluar',
                     fontSize: 14.0,
@@ -96,8 +77,14 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                 children: [
                   Navigator(
                     onGenerateRoute: (settings) {
-                      Widget page = TransaksiPage();
+                      Widget page = GenerateScreen();
                       // if (settings.name == 'page2') page = SplashScreen();
+                      return MaterialPageRoute(builder: (_) => page);
+                    },
+                  ),
+                  Navigator(
+                    onGenerateRoute: (settings) {
+                      Widget page = DaftarBillingPage();
                       return MaterialPageRoute(builder: (_) => page);
                     },
                   ),
@@ -114,7 +101,6 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
         ),
       ),
     );
-
   }
 }
 _goBack(BuildContext context) {
@@ -123,9 +109,3 @@ _goBack(BuildContext context) {
     MaterialPageRoute(builder: (context) => DashboardScreen()),
   );
 }
-// return Scaffold(
-// appBar: AppBar(
-// backgroundColor: Color(0xFF2E93E1),
-// centerTitle: true,
-//
-// ),

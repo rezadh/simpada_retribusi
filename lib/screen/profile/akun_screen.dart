@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/models/bottom_bar.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 import 'package:simpada/screen/login/login_screen.dart';
+import 'package:simpada/screen/scan/scan_screen.dart';
 
 class AkunScreen extends StatefulWidget {
 
@@ -14,7 +15,25 @@ enum BottomIcons { Beranda, Akun }
 
 class _AkunScreenState extends State<AkunScreen> {
   BottomIcons bottomIcons = BottomIcons.Akun;
-
+  String _name;
+  getName() async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var nama = prefs.getString('name');
+    _name = prefs.getString('name');
+    return _name;
+  }
+  @override
+  void initState() {
+    setState(() {
+      getName().then((id){
+        setState(() {
+          _name = id;
+        });
+      });
+    });
+    // print(_name);
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -81,7 +100,13 @@ class _AkunScreenState extends State<AkunScreen> {
                     Center(
                       heightFactor: 0.3,
                       child: FloatingActionButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ScanScreen()),
+                          );
+                        },
                         backgroundColor: Color(0xFFF2994A),
                         child: Icon(
                           Icons.qr_code_2,
@@ -131,7 +156,7 @@ class _AkunScreenState extends State<AkunScreen> {
                       ),
                       SizedBox(height: 4),
                       Text(
-                        'Amstrong',
+                        _name ?? '',
                         style: TextStyle(
                             fontFamily: 'poppins regular',
                             color: Colors.white,

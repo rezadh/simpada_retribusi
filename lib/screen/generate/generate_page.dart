@@ -18,6 +18,9 @@ class _GenerateScreenState extends State<GenerateScreen> {
   final selectedIndexes = [];
   final selectedNTRD = [];
   final selectedNilai = [];
+  List dataNTRD = [];
+  List dataTanggal = [];
+  List dataNilai = [];
   List<bool> checkBoxValues;
   BillCode _billCode;
 
@@ -113,18 +116,18 @@ class _GenerateScreenState extends State<GenerateScreen> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Color(0xFF2E93E1),
-        centerTitle: true,
-        title: Text(
-          'Generate',
-          style: TextStyle(
-            fontFamily: 'poppins regluar',
-            fontSize: 14.0,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
+      // appBar: AppBar(
+      //   backgroundColor: Color(0xFF2E93E1),
+      //   centerTitle: true,
+      //   title: Text(
+      //     'Generate',
+      //     style: TextStyle(
+      //       fontFamily: 'poppins regluar',
+      //       fontSize: 14.0,
+      //     ),
+      //     textAlign: TextAlign.center,
+      //   ),
+      // ),
       body: Container(
         width: size.width,
         height: size.height,
@@ -172,6 +175,22 @@ class _GenerateScreenState extends State<GenerateScreen> {
                             builder: (context, snapshot) {
                               if (snapshot.hasData) {
                                 List<ListNTRD> data = snapshot.data;
+                                dataNTRD.clear();
+                                dataTanggal.clear();
+                                dataNilai.clear();
+                                if (dataNTRD.isEmpty) {
+                                  for (int i = 0; i < data.length; i++) {
+                                    print(data[i].ntrd);
+                                    print(data[i].tanggalPenagihan);
+                                    if (data[i].status == 1) {
+                                      print(data[i].status);
+                                      dataNTRD.add(data[i].ntrd);
+                                      dataTanggal.add(_getDateFormat(
+                                          data[i].tanggalPenagihan));
+                                      dataNilai.add(data[i].nominal);
+                                    }
+                                  }
+                                }
                                 return Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,23 +207,23 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                               fontFamily: 'opensans regular',
                                               fontWeight: FontWeight.w600),
                                         ),
-                                        SizedBox(height: 5),
+                                        SizedBox(height: 7),
                                         Container(
                                           width: 110,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
-                                            itemCount: data.length,
+                                            itemCount: dataNTRD.length,
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               return Container(
                                                 child: Column(
                                                   children: [
                                                     Text(
-                                                      data[index].ntrd,
+                                                      dataNTRD[index],
                                                       style: TextStyle(
-                                                        fontSize: 12,
+                                                        fontSize: 11,
                                                         fontFamily:
                                                             'opensans regular',
                                                         fontWeight:
@@ -213,7 +232,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                             Color(0xFF757F8C),
                                                       ),
                                                     ),
-                                                    SizedBox(height: 10),
+                                                    SizedBox(height: 11),
                                                   ],
                                                 ),
                                               );
@@ -235,25 +254,23 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                               fontFamily: 'opensans regular',
                                               fontWeight: FontWeight.w600),
                                         ),
-                                        SizedBox(height: 5),
+                                        SizedBox(height: 7),
                                         Container(
                                           width: 50,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
-                                            itemCount: data.length,
+                                            itemCount: dataTanggal.length,
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               return Container(
                                                 child: Column(
                                                   children: [
                                                     Text(
-                                                      _getDateFormat(data[index]
-                                                              .tanggalPenagihan)
-                                                          .toString(),
+                                                      dataTanggal[index],
                                                       style: TextStyle(
-                                                        fontSize: 12,
+                                                        fontSize: 11,
                                                         fontFamily:
                                                             'opensans regular',
                                                         fontWeight:
@@ -262,7 +279,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                             Color(0xFF757F8C),
                                                       ),
                                                     ),
-                                                    SizedBox(height: 10),
+                                                    SizedBox(height: 11),
                                                   ],
                                                 ),
                                               );
@@ -284,14 +301,14 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                               fontFamily: 'opensans regular',
                                               fontWeight: FontWeight.w600),
                                         ),
-                                        SizedBox(height: 5),
+                                        SizedBox(height: 7),
                                         Container(
                                           width: 55,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
-                                            itemCount: data.length,
+                                            itemCount: dataNilai.length,
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               return Container(
@@ -304,10 +321,10 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                                   decimalDigits:
                                                                       0)
                                                           .format(int.parse(
-                                                              data[index]
-                                                                  .nominal)),
+                                                              dataNilai[
+                                                                  index])),
                                                       style: TextStyle(
-                                                        fontSize: 12,
+                                                        fontSize: 11,
                                                         fontFamily:
                                                             'opensans regular',
                                                         fontWeight:
@@ -316,7 +333,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                             Color(0xFF757F8C),
                                                       ),
                                                     ),
-                                                    SizedBox(height: 10),
+                                                    SizedBox(height: 11),
                                                   ],
                                                 ),
                                               );
@@ -338,44 +355,48 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                               fontFamily: 'opensans regular',
                                               fontWeight: FontWeight.w600),
                                         ),
-                                        SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: Transform.scale(
-                                            scale: 0.8,
-                                            child: Checkbox(
-                                              value: checked,
-                                              onChanged: (value) {
-                                                setState(() {
-                                                  checked = value;
-                                                  data.forEach((element) {
-                                                    element.selected = value;
+                                        Visibility(
+                                          visible:
+                                              dataNTRD.isEmpty ? false : true,
+                                          child: SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: Transform.scale(
+                                              scale: 0.8,
+                                              child: Checkbox(
+                                                value: checked,
+                                                onChanged: (value) {
+                                                  setState(() {
+                                                    checked = value;
+                                                    data.forEach((element) {
+                                                      element.selected = value;
+                                                    });
+                                                    if (checked) {
+                                                      for (int i = 0;
+                                                          i < dataNTRD.length;
+                                                          i++) {
+                                                        selectedNTRD
+                                                            .add(dataNTRD[i]);
+                                                        selectedNilai
+                                                            .add(dataNilai[i]);
+                                                      }
+                                                    } else {
+                                                      for (int i = 0;
+                                                          i < dataNTRD.length;
+                                                          i++) {
+                                                        selectedNTRD.remove(
+                                                            dataNTRD[i]);
+                                                        selectedNilai.remove(
+                                                            dataNilai[i]);
+                                                      }
+                                                      selectedNilai.clear();
+                                                      selectedNTRD.clear();
+                                                    }
+                                                    print(selectedNTRD);
+                                                    print(checkBoxValue);
                                                   });
-                                                  if (checked) {
-                                                    for (int i = 0;
-                                                        i < data.length;
-                                                        i++) {
-                                                      selectedNTRD
-                                                          .add(data[i].ntrd);
-                                                      selectedNilai
-                                                          .add(data[i].nominal);
-                                                    }
-                                                  } else {
-                                                    for (int i = 0;
-                                                        i < data.length;
-                                                        i++) {
-                                                      selectedNTRD
-                                                          .remove(data[i].ntrd);
-                                                      selectedNilai.remove(
-                                                          data[i].nominal);
-                                                    }
-                                                    selectedNilai.clear();
-                                                    selectedNTRD.clear();
-                                                  }
-                                                  print(selectedNTRD);
-                                                  print(checkBoxValue);
-                                                });
-                                              },
+                                                },
+                                              ),
                                             ),
                                           ),
                                         ),
@@ -385,7 +406,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                             physics:
                                                 NeverScrollableScrollPhysics(),
                                             shrinkWrap: true,
-                                            itemCount: data.length,
+                                            itemCount: dataNTRD.length,
                                             itemBuilder: (BuildContext context,
                                                 int index) {
                                               return Container(
@@ -427,21 +448,19 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                                 selectedIndexes
                                                                     .remove(
                                                                         index);
-                                                                selectedNTRD
-                                                                    .remove(data[
-                                                                            index]
-                                                                        .ntrd);
-                                                                selectedNilai
-                                                                    .remove(data[
-                                                                            index]
-                                                                        .nominal);
+                                                                selectedNTRD.remove(
+                                                                    dataNTRD[
+                                                                        index]);
+                                                                selectedNilai.remove(
+                                                                    dataNilai[
+                                                                        index]);
                                                               } else {
                                                                 selectedNTRD.add(
-                                                                    data[index]
-                                                                        .ntrd);
+                                                                    dataNTRD[
+                                                                        index]);
                                                                 selectedNilai.add(
-                                                                    data[index]
-                                                                        .nominal);
+                                                                    dataNilai[
+                                                                        index]);
                                                               }
                                                               selectedNTRD.sort(
                                                                   (a, b) => a
@@ -489,12 +508,20 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
-                                      SizedBox(height: 47),
-                                      Image.asset('images/connection_lost.png'),
-                                      Text(
-                                        'Jaringan Tidak Tersedia. Mohon Periksa Koneksi Anda',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 18),
+                                      SizedBox(height: 20),
+                                      Image.asset(
+                                        'images/connection_lost.png',
+                                        width: 100,
+                                      ),
+                                      Container(
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                1.5,
+                                        child: Text(
+                                          'Jaringan Tidak Tersedia. Mohon Periksa Koneksi Anda',
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(fontSize: 14),
+                                        ),
                                       ),
                                     ],
                                   ),

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
+import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 import 'package:simpada/screen/riwayat/bukti_bayar_riwayat_screen.dart';
 
 class TransaksiPage extends StatefulWidget {
@@ -18,7 +19,7 @@ Widget _dash(BuildContext context) {
   final dashWidth = 10.0;
   final dashCount = (size.width / (2 * dashWidth)).floor();
   return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 8.0),
+    padding: const EdgeInsets.symmetric(vertical: 5.0),
     child: Flex(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       direction: Axis.horizontal,
@@ -38,7 +39,7 @@ Widget _dash(BuildContext context) {
 class _TransaksiPageState extends State<TransaksiPage> {
   var _name;
   var _waktu;
-  var _npwrd;
+  List<dynamic> _listNpwrd = [];
   var tglPungut;
   int idProduk;
   int idTempat;
@@ -47,28 +48,51 @@ class _TransaksiPageState extends State<TransaksiPage> {
   String tempatRetribusi;
   String _jenisRetribusi;
   String _namaWajibRetribusi;
+  String _tempatRetribusi;
   String _jenisProduk;
   String _namaLokasi;
   var _dateNow;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
       new GlobalKey<RefreshIndicatorState>();
 
-
   getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _name = prefs.getString('name');
-    _npwrd = prefs.getString('npwrd');
-    _namaWajibRetribusi = prefs.getString('nama_wr');
-    _jenisRetribusi = prefs.getString('jenis_retribusi');
-    _jenisProduk = prefs.getString('jenis_produk');
-    _namaLokasi = prefs.getString('nama_lokasi');
+    // _npwrd = prefs.getString('npwrd');
+    // _namaWajibRetribusi = prefs.getString('nama_wr');
+    // _jenisRetribusi = prefs.getString('jenis_retribusi');
+    // _tempatRetribusi = prefs.getString('tempat_retribusi');
+    // _jenisProduk = prefs.getString('jenis_produk');
+    // _namaLokasi = prefs.getString('nama_lokasi');
     return _name;
   }
+
+  void requestProduk(String npwrd) async {
+    await postRequestProduk(npwrd).then((value) async {
+      if (value != null) {
+        setState(() {
+          _jenisRetribusi = 'Pasar';
+          _namaLokasi = value[0].lokasi.nama;
+          _jenisProduk =
+              value[0].lokasi.daftarTempat[0].daftarProdukBawah[0].type;
+          _tempatRetribusi = value[0].lokasi.daftarTempat[0].nama;
+        });
+      }
+      await postRequestProfile(_listNpwrd).then((value) {
+        if (value != null) {
+          setState(() {
+            _namaWajibRetribusi = value[0].namaWr;
+          });
+        }
+      });
+    });
+  }
+
   _getDate(String _date) {
     DateTime dateFormat = DateFormat('dd-MM-yyyy').parse(_date);
     var date = DateFormat('dd').format(dateFormat);
     var month = DateFormat('MM').format(dateFormat);
-    var year = DateFormat('yyyy').format(dateFormat);
+    var year = DateFormat('yy').format(dateFormat);
     String parseMonth;
     if (month == '01') {
       parseMonth = 'Januari';
@@ -98,43 +122,119 @@ class _TransaksiPageState extends State<TransaksiPage> {
     _dateNow = '$date $parseMonth $year';
     return _dateNow;
   }
-  _getDatePeriode(String _date) {
-    print(_date);
-    var date = _date.substring(0,2);
-    var month = _date.substring(2,4);
-    var year = _date.substring(4,8);
+
+  // _getDateNow() {
+  //   var dateNow = DateTime.now();
+  //   var day = DateFormat('dd').format(dateNow);
+  //   var month = DateFormat('MM').format(dateNow);
+  //   var year = DateFormat('yy').format(dateNow);
+  //   String parseMonth;
+  //   if (month == '01') {
+  //     parseMonth = 'Jan';
+  //   } else if (month == '02') {
+  //     parseMonth = 'Feb';
+  //   } else if (month == '03') {
+  //     parseMonth = 'Mar';
+  //   } else if (month == '04') {
+  //     parseMonth = 'Apr';
+  //   } else if (month == '05') {
+  //     parseMonth = 'Mei';
+  //   } else if (month == '06') {
+  //     parseMonth = 'Jun';
+  //   } else if (month == '07') {
+  //     parseMonth = 'Jul';
+  //   } else if (month == '08') {
+  //     parseMonth = 'Agu';
+  //   } else if (month == '09') {
+  //     parseMonth = 'Sep';
+  //   } else if (month == '10') {
+  //     parseMonth = 'Okt';
+  //   } else if (month == '11') {
+  //     parseMonth = 'Nov';
+  //   } else if (month == '12') {
+  //     parseMonth = 'Des';
+  //   }
+  //   _dateNow = '$day $parseMonth $year';
+  //   return _dateNow;
+  // }
+
+  _getDatePeriode(String _date, String periode) {
+    // DateTime dateFormat = DateFormat('dd-MM-yyyy').parse(_date);
+    var parts = _date.split('/');
+    var dateNow = DateTime.now();
+    // var dayNow = DateFormat('dd').format(dateNow);
+    // var monthNow = DateFormat('MM').format(dateNow);
+    // var yearNow = DateFormat('yy').format(dateNow);
+    var firstDate = _date.length <= 8 ? _date : parts[0].trim();
+    var firstDay = firstDate.substring(0, 2);
+    var firstMonth = firstDate.substring(2, 4);
+    var firstYear = firstDate.substring(6, 8);
+    var dateNew = _date.length <= 8 ? _date : parts[1].trim();
+    var date = dateNew.substring(0, 2);
+    var month = dateNew.substring(2, 4);
+    var year = dateNew.substring(6, 8);
     print(date);
     print(month);
     print(year);
+    String parseFirstMonth = getMonth(firstMonth);
     String parseMonth;
     if (month == '01') {
-      parseMonth = 'Januari';
+      parseMonth = 'Jan';
     } else if (month == '02') {
-      parseMonth = 'Februari';
+      parseMonth = 'Feb';
     } else if (month == '03') {
-      parseMonth = 'Maret';
+      parseMonth = 'Mar';
     } else if (month == '04') {
-      parseMonth = 'April';
+      parseMonth = 'Apr';
     } else if (month == '05') {
       parseMonth = 'Mei';
     } else if (month == '06') {
-      parseMonth = 'Juni';
+      parseMonth = 'Jun';
     } else if (month == '07') {
-      parseMonth = 'Juli';
+      parseMonth = 'Jul';
     } else if (month == '08') {
-      parseMonth = 'Agustus';
+      parseMonth = 'Agu';
     } else if (month == '09') {
-      parseMonth = 'September';
+      parseMonth = 'Sep';
     } else if (month == '10') {
-      parseMonth = 'Oktober';
+      parseMonth = 'Okt';
     } else if (month == '11') {
-      parseMonth = 'November';
+      parseMonth = 'Nov';
     } else if (month == '12') {
-      parseMonth = 'Desember';
+      parseMonth = 'Des';
     }
-    _dateNow = '$date $parseMonth $year';
+    // _dateNow = '$dayNow $parseMonthNow $yearNow - $date $parseMonth $year';
+    if (int.parse(year) > int.parse(firstYear)) {
+      if (int.parse(month) == int.parse(firstMonth)) {
+        if (periode.toLowerCase() == 'bulanan') {
+          _dateNow = '$parseFirstMonth - $parseMonth $year';
+        } else {
+          _dateNow = '$firstDay - $date $parseMonth $year';
+        }
+      } else if (int.parse(month) > int.parse(firstMonth)) {
+        if (periode.toLowerCase() == 'bulanan') {
+          _dateNow = '$parseFirstMonth - $parseMonth $year';
+        } else {
+          _dateNow = '$firstDay $parseFirstMonth - $date $parseMonth $year';
+        }
+      }
+      if (periode.toLowerCase() == 'bulanan') {
+        _dateNow = '$parseFirstMonth $firstYear - $parseMonth $year';
+      } else {
+        _dateNow =
+            '$firstDay $parseFirstMonth $firstYear - $date $parseMonth $year';
+      }
+    } else {
+      if (periode.toLowerCase() == 'bulanan') {
+        _dateNow = '$parseFirstMonth - $parseMonth $year';
+      } else {
+        _dateNow = '$firstDay $parseFirstMonth - $date $parseMonth $year';
+      }
+    }
+
     return _dateNow;
   }
+
   String getMonth(String month) {
     if (month == '01') {
       return 'Jan';
@@ -163,6 +263,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
     }
     return null;
   }
+
   _getDateTime(String date) {
     DateTime dateFormat = DateFormat('dd-MM-yyyy HH:mm').parse(date);
     var day = DateFormat('dd').format(dateFormat);
@@ -173,6 +274,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
     String dateTime = '$day $parseMonth $year';
     return dateTime;
   }
+
   @override
   void initState() {
     setState(() {
@@ -188,6 +290,24 @@ class _TransaksiPageState extends State<TransaksiPage> {
       key: _refreshIndicatorKey,
       onRefresh: postRequestLastPayment,
       child: Scaffold(
+        appBar: AppBar(
+          // leading: IconButton(
+          //   icon: Icon(Icons.arrow_back_ios),
+          //   iconSize: 20.0,
+          //   onPressed: () {
+          //     _goBack(context);
+          //   },
+          // ),
+          centerTitle: true,
+          title: Text(
+            'Riwayat',
+            style: TextStyle(
+              fontFamily: 'poppins regluar',
+              fontSize: 14.0,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ),
         backgroundColor: Color(0xFFF2F2F2),
         body: Container(
           padding: EdgeInsets.only(top: 19, bottom: 19),
@@ -198,37 +318,45 @@ class _TransaksiPageState extends State<TransaksiPage> {
               children: [
                 FutureBuilder<List<LastPayment>>(
                   future: postRequestLastPayment(),
-                  builder: (context, snapshot){
-                    if(snapshot.hasData){
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
                       List<LastPayment> data = snapshot.data;
                       return ListView.builder(
                         itemCount: data.length,
-                        physics:
-                        NeverScrollableScrollPhysics(),
+                        physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemBuilder: (context, index){
+                        itemBuilder: (context, index) {
                           return Column(
                             children: [
                               GestureDetector(
-                                onTap: (){
-
-                                  Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => BuktiBayarRiwayatScreen(
-                                            npwrd: _npwrd,
-                                            tanggalPenagihan: _getDate(data[index].tanggalPenagihan),
-                                            nominalPajak: data[index].nominal,
-                                            jenisProduk: _jenisProduk,
-                                            jenisRetribusi: _jenisRetribusi,
-                                            lokasiRetribusi: _namaLokasi,
-                                            namaWajibRetribusi: _namaWajibRetribusi,
-                                            name: _name,
-                                            periodePenagihan: data[index].satuanPeriode,
-                                            periodeBayar: _getDatePeriode(data[index].periode.toString()),
-                                          ),
+                                onTap: () {
+                                  setState(() {
+                                    // _listNpwrd.clear();
+                                    // _listNpwrd.add(data[index].npwrd);
+                                    // requestProduk(data[index].npwrd);
+                                    // print(_getDatePeriode(
+                                    //     data[index].periode.toString()));
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            BuktiBayarRiwayatScreen(
+                                          ntrd: data[index].ntrd,
+                                          npwrd: data[index].npwrd,
+                                          tanggalPenagihan: _getDate(
+                                              data[index].tanggalPenagihan),
+                                          nominalPajak: data[index].nominal,
+                                          name: _name,
+                                          periodePenagihan:
+                                              data[index].satuanPeriode,
+                                          periodeBayar: _getDatePeriode(
+                                              data[index].periode.toString(),
+                                              data[index].satuanPeriode),
+                                          status: data[index].status,
                                         ),
-                                      );
+                                      ),
+                                    );
+                                  });
                                 },
                                 child: Card(
                                   margin: EdgeInsets.only(left: 25, right: 25),
@@ -241,35 +369,40 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                     child: Column(
                                       children: [
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    'Jenis Retribusi',
+                                                    'NTRD',
                                                     style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontFamily: 'opensans regular',
-                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 11,
+                                                      fontFamily:
+                                                          'opensans regular',
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
                                                   Text(
                                                     ':',
                                                     style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 11,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             Text(
-                                              'Parkir',
+                                              data[index].ntrd,
                                               style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 11,
                                                 fontFamily: 'opensans regular',
                                                 fontWeight: FontWeight.w600,
                                                 color: Color(0xFF4F4F4F),
@@ -279,35 +412,40 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                         ),
                                         _dash(context),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Text(
-                                                    'Penanggung Jawab',
+                                                    'NPWRD',
                                                     style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontFamily: 'opensans regular',
-                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 11,
+                                                      fontFamily:
+                                                          'opensans regular',
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
                                                   Text(
                                                     ':',
                                                     style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 11,
                                                     ),
                                                   ),
                                                 ],
                                               ),
                                             ),
                                             Text(
-                                              _name.toString(),
+                                              data[index].npwrd,
                                               style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 11,
                                                 fontFamily: 'opensans regular',
                                                 fontWeight: FontWeight.w600,
                                                 color: Color(0xFF4F4F4F),
@@ -316,65 +454,75 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                           ],
                                         ),
                                         _dash(context),
+                                        // Row(
+                                        //   mainAxisAlignment:
+                                        //       MainAxisAlignment.spaceBetween,
+                                        //   children: [
+                                        //     Container(
+                                        //       width: 132,
+                                        //       child: Row(
+                                        //         mainAxisAlignment:
+                                        //             MainAxisAlignment
+                                        //                 .spaceBetween,
+                                        //         children: [
+                                        //           Text(
+                                        //             'Lokasi Retribusi',
+                                        //             style: TextStyle(
+                                        //               fontSize: 11,
+                                        //               fontFamily:
+                                        //                   'opensans regular',
+                                        //               fontWeight:
+                                        //                   FontWeight.w400,
+                                        //               color: Color(0xFF4F4F4F),
+                                        //             ),
+                                        //           ),
+                                        //           Text(
+                                        //             ':',
+                                        //             style: TextStyle(
+                                        //               fontSize: 11,
+                                        //             ),
+                                        //           ),
+                                        //         ],
+                                        //       ),
+                                        //     ),
+                                        //     Text(
+                                        //       'Gedung Mk P3',
+                                        //       style: TextStyle(
+                                        //         fontSize: 11,
+                                        //         fontFamily: 'opensans regular',
+                                        //         fontWeight: FontWeight.w600,
+                                        //         color: Color(0xFF4F4F4F),
+                                        //       ),
+                                        //     ),
+                                        //   ],
+                                        // ),
+                                        // _dash(context),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Text(
-                                                    'Lokasi Retribusi',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontFamily: 'opensans regular',
-                                                      fontWeight: FontWeight.w400,
-                                                      color: Color(0xFF4F4F4F),
-                                                    ),
-                                                  ),
-                                                  Text(
-                                                    ':',
-                                                    style: TextStyle(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Text(
-                                              'Gedung Mk P3',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontFamily: 'opensans regular',
-                                                fontWeight: FontWeight.w600,
-                                                color: Color(0xFF4F4F4F),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        _dash(context),
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Container(
-                                              width: 132,
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'Waktu Pembayaran',
                                                     style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontFamily: 'opensans regular',
-                                                      fontWeight: FontWeight.w400,
+                                                      fontSize: 11,
+                                                      fontFamily:
+                                                          'opensans regular',
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
                                                   Text(
                                                     ':',
                                                     style: TextStyle(
-                                                      fontSize: 12,
+                                                      fontSize: 11,
                                                     ),
                                                   ),
                                                 ],
@@ -383,28 +531,35 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                             Row(
                                               children: [
                                                 Text(
-                                                  _getDateTime(data[index].tanggalPenagihan),
+                                                  _getDateTime(data[index]
+                                                      .tanggalPenagihan),
                                                   style: TextStyle(
-                                                    fontSize: 12,
-                                                    fontFamily: 'opensans regular',
+                                                    fontSize: 11,
+                                                    fontFamily:
+                                                        'opensans regular',
                                                     fontWeight: FontWeight.w600,
                                                     color: Color(0xFF4F4F4F),
                                                   ),
                                                 ),
                                                 Container(
-                                                  margin: EdgeInsets.only(left: 3.0),
+                                                  margin: EdgeInsets.only(
+                                                      left: 3.0),
                                                   padding: EdgeInsets.all(1.0),
                                                   decoration: BoxDecoration(
                                                     color: Color(0xFFFFE38C),
-                                                    borderRadius: BorderRadius.circular(9.0),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            9.0),
                                                     // border: Border.all(width: 2, color: Colors.white),
                                                   ),
                                                   child: Text(
                                                     _waktu.toString(),
                                                     style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontFamily: 'opensans regular',
-                                                      fontWeight: FontWeight.w600,
+                                                      fontSize: 11,
+                                                      fontFamily:
+                                                          'opensans regular',
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -415,19 +570,72 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                         ),
                                         _dash(context),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'Total Nilai Retribusi',
                                                     style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontFamily:
+                                                          'opensans regular',
+                                                      fontWeight:
+                                                          FontWeight.w400,
+                                                      color: Color(0xFF4F4F4F),
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    ':',
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Text(
+                                              NumberFormat.simpleCurrency(
+                                                      locale: 'id',
+                                                      decimalDigits: 0)
+                                                  .format(int.parse(
+                                                      data[index].nominal))
+                                                  .toString(),
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontFamily: 'opensans regular',
+                                                fontWeight: FontWeight.w600,
+                                                color: Color(0xFF27AE60),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        _dash(context),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Container(
+                                              width: 132,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    'Status',
+                                                    style: TextStyle(
                                                       fontSize: 12,
-                                                      fontFamily: 'opensans regular',
-                                                      fontWeight: FontWeight.w400,
+                                                      fontFamily:
+                                                          'opensans regular',
+                                                      fontWeight:
+                                                          FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -441,60 +649,30 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                               ),
                                             ),
                                             Text(
-                                                NumberFormat
-                                                    .simpleCurrency(
-                                                    locale: 'id',
-                                                    decimalDigits: 0)
-                                                    .format(int.parse(data[index].nominal))
-                                                    .toString(),
+                                              data[index].status == '1'
+                                                  ? 'Belum Generate Billing'
+                                                  : data[index].status == '2'
+                                                      ? 'Sudah Generate Billing'
+                                                      : data[index].status ==
+                                                              '3'
+                                                          ? 'Kode Billing Kedaluwarsa'
+                                                          : 'Lunas',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 fontFamily: 'opensans regular',
                                                 fontWeight: FontWeight.w600,
-                                                color: Color(0xFF27AE60),
+                                                color: data[index].status == '1'
+                                                    ? Color(0xFFF2994A)
+                                                    : data[index].status == '2'
+                                                        ? Color(0xFF27AE60)
+                                                        : data[index].status ==
+                                                                '3'
+                                                            ? Color(0xFFF2994A)
+                                                            : Color(0xFF27AE60),
                                               ),
                                             ),
                                           ],
                                         ),
-                                        _dash(context),
-                                        // Row(
-                                        //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        //   children: [
-                                        //     Container(
-                                        //       width: 132,
-                                        //       child: Row(
-                                        //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        //         children: [
-                                        //           Text(
-                                        //             'Status',
-                                        //             style: TextStyle(
-                                        //               fontSize: 12,
-                                        //               fontFamily: 'opensans regular',
-                                        //               fontWeight: FontWeight.w400,
-                                        //               color: Color(0xFF4F4F4F),
-                                        //             ),
-                                        //           ),
-                                        //           Text(
-                                        //             ':',
-                                        //             style: TextStyle(
-                                        //               fontSize: 12,
-                                        //             ),
-                                        //           ),
-                                        //         ],
-                                        //       ),
-                                        //     ),
-                                        //     Text(
-                                        //       'Lunas',
-                                        //       style: TextStyle(
-                                        //         fontSize: 12,
-                                        //         fontFamily: 'opensans regular',
-                                        //         fontWeight: FontWeight.w600,
-                                        //         color: Color(0xFF27AE60),
-                                        //       ),
-                                        //     ),
-                                        //   ],
-                                        // ),
-
                                       ],
                                     ),
                                   ),
@@ -505,14 +683,21 @@ class _TransaksiPageState extends State<TransaksiPage> {
                           );
                         },
                       );
+                    } else {
+                      return Container(
+                        height: MediaQuery.of(context).size.height - 165,
+                        child: Center(
+                          child: Text('Data tidak ada'),
+                        ),
+                      );
                     }
-                    return Container(
-                      height: MediaQuery.of(context).size.height,
-                      child: Center(
-                          child: CircularProgressIndicator(
-                            color: Colors.blue,
-                          )),
-                    );
+                    // return Container(
+                    //   height: MediaQuery.of(context).size.height,
+                    //   child: Center(
+                    //       child: CircularProgressIndicator(
+                    //         color: Colors.blue,
+                    //       )),
+                    // );
                   },
                 ),
               ],
@@ -522,4 +707,11 @@ class _TransaksiPageState extends State<TransaksiPage> {
       ),
     );
   }
+}
+
+_goBack(BuildContext context) {
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (context) => DashboardScreen()),
+  );
 }

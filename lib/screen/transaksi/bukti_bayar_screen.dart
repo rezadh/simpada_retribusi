@@ -24,6 +24,7 @@ class BuktiBayarScreen extends StatefulWidget {
   final totalNilai;
   final dibayarkan;
   final periodeBayar;
+  final tempatRetribusi;
 
   BuktiBayarScreen(
       {this.npwrd,
@@ -37,7 +38,7 @@ class BuktiBayarScreen extends StatefulWidget {
       this.tanggalPenagihan,
       this.totalNilai,
       this.dibayarkan,
-      this.periodeBayar});
+      this.periodeBayar, this.tempatRetribusi});
 
   @override
   _BuktiBayarScreenState createState() => _BuktiBayarScreenState();
@@ -55,6 +56,7 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
   String _name;
   String _dibayarkan;
   String _periodeBayar;
+  String _tempatRetribusi;
   var _tanggalPenagihan;
   int _valueValidation = 0;
 
@@ -71,6 +73,7 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
     _totalNilai = widget.totalNilai;
     _tanggalPenagihan = widget.tanggalPenagihan;
     _periodeBayar = widget.periodeBayar;
+    _tempatRetribusi = widget.tempatRetribusi;
   }
 
   static const platformMethodChannel = const MethodChannel('com.pac.print/edc');
@@ -107,17 +110,13 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
       'Wajib Retribusi  :$_namaWajibRetribusi',
       'Jenis Retribusi  :$_jenisRetribusi',
       'Jenis produk     :$_jenisProduk',
-      'Penanggung Jawab :$_name',
+      'Kolektor         :$_name',
       'Periode Penagihan:$_periodePenagihan',
+      'Lokasi Retribusi :$_lokasiRetribusi',
+      'Tempat Retribusi :$_tempatRetribusi',
       'Tanggal Penagihan:$_tanggalPenagihan',
       'Periode Bayar    :$_periodeBayar',
-      'Lokasi Retribusi :$_lokasiRetribusi',
-      'Nilai Retribusi  :${NumberFormat
-          .simpleCurrency(
-          locale: 'id',
-          decimalDigits: 0)
-          .format(int.parse(_nominalPajak))
-          .toString()}',
+      'Nilai Retribusi  :${NumberFormat.simpleCurrency(locale: 'id', decimalDigits: 0).format(int.parse(_nominalPajak)).toString()}',
     ];
     Map data = {
       'title': 'BUKTI PEMBAYARAN',
@@ -364,10 +363,10 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   width: 135,
                                   child: Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Penanggung Jawab',
+                                        'Kolektor',
                                         style: TextStyle(
                                             color: Color(0xFF757F8C),
                                             fontSize: 14,
@@ -433,6 +432,72 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
+                                        'Lokasi Retribusi',
+                                        style: TextStyle(
+                                            color: Color(0xFF757F8C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                      Text(':'),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  _lokasiRetribusi.toString(),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'opensans regular'),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 11,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 135,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Tempat Retribusi',
+                                        style: TextStyle(
+                                            color: Color(0xFF757F8C),
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w400,
+                                            fontFamily: 'opensans regular'),
+                                      ),
+                                      Text(':'),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  _tempatRetribusi.toString(),
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'opensans regular'),
+                                ),
+                              ],
+                            ),
+                            SizedBox(
+                              height: 11,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Container(
+                                  width: 135,
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
                                         'Tanggal Penagihan',
                                         style: TextStyle(
                                             color: Color(0xFF757F8C),
@@ -463,7 +528,7 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   width: 135,
                                   child: Row(
                                     mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         'Periode Bayar',
@@ -499,39 +564,6 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                         MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
-                                        'Lokasi Retribusi',
-                                        style: TextStyle(
-                                            color: Color(0xFF757F8C),
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w400,
-                                            fontFamily: 'opensans regular'),
-                                      ),
-                                      Text(':'),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  _lokasiRetribusi.toString(),
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
-                                      fontFamily: 'opensans regular'),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 11,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Container(
-                                  width: 135,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
                                         'Nilai Retribusi',
                                         style: TextStyle(
                                             color: Color(0xFF757F8C),
@@ -544,10 +576,8 @@ class _BuktiBayarScreenState extends State<BuktiBayarScreen> {
                                   ),
                                 ),
                                 Text(
-                                  NumberFormat
-                                      .simpleCurrency(
-                                      locale: 'id',
-                                      decimalDigits: 0)
+                                  NumberFormat.simpleCurrency(
+                                          locale: 'id', decimalDigits: 0)
                                       .format(int.parse(_nominalPajak))
                                       .toString(),
                                   style: TextStyle(

@@ -1,15 +1,10 @@
-import 'dart:convert';
-
-import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
-import 'package:http/http.dart' as http;
 import 'package:simpada/screen/transaksi/transaksi_screen.dart';
-import '../../constants.dart';
 
 class PreviewScanScreen extends StatefulWidget {
   final npwrd;
@@ -23,16 +18,17 @@ class PreviewScanScreen extends StatefulWidget {
   final name;
   final dateNow;
 
-  PreviewScanScreen({this.npwrd,
-    this.jenisRetribusi,
-    this.jenisProduk,
-    this.namaWajibRetribusi,
-    this.nominalPajak,
-    this.periodePenagihan,
-    this.lokasiRetribusi,
-    this.name,
-    this.username,
-    this.dateNow});
+  PreviewScanScreen(
+      {this.npwrd,
+      this.jenisRetribusi,
+      this.jenisProduk,
+      this.namaWajibRetribusi,
+      this.nominalPajak,
+      this.periodePenagihan,
+      this.lokasiRetribusi,
+      this.name,
+      this.username,
+      this.dateNow});
 
   @override
   _PreviewScanScreenState createState() => _PreviewScanScreenState();
@@ -48,67 +44,23 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
   String _name;
   String _jenisProduk;
   String _periodePenagihan;
+  String _parseMonth;
+  String _parseMonthPreview;
+  String namaLokasi;
+  String _tempatRetribusi;
   var _dateNow;
   var _formatPeriode;
   var _periodeBayar;
   var _periodeBayarPreview;
   var _newDate;
-  String _parseMonth;
-  String _parseMonthPreview;
-  Future<List<Produk>> futureData;
-  String namaLokasi;
-  String tempatRetribusi;
-  int _totalPenagihan = 1;
+  var _terakhirBayar;
   var tglPungut;
+  int _totalPenagihan = 1;
   int idProduk;
   int idTempat;
   int tarif;
   var _formatNewDate;
-
-  Future<List<Produk>> postRequestProduk(String npwrd) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    var api = prefs.getString('apikey');
-    DateTime dateNow = DateTime.now();
-    var token = prefs.getString('token');
-    var noHp = prefs.getString('noHp');
-    var date = DateFormat("yyyy-MM-dd").format(dateNow);
-    var time = DateFormat("HH:mm:ss.sss").format(dateNow);
-    var clientTime = DateFormat('dd-MM-yyyy HH:mm:ss').format(dateNow);
-    String timeStamp = date + 'T' + time + 'Z';
-    var _signature = utf8.encode('$noHp:$timeStamp');
-    var key = utf8.encode(api);
-    var hmacSha256 = Hmac(sha256, key);
-    Digest digest = hmacSha256.convert(_signature);
-    String url = BaseUrl + 'retribusi/wr/produk';
-    Map<String, String> h = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-      'Timestamp': timeStamp,
-      'Signature': digest.toString(),
-    };
-    Map b = {'npwrd': npwrd, 'tgl_request': clientTime, 'username': noHp};
-    var response =
-    await http.post(Uri.parse(url), headers: h, body: json.encode(b));
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      Map responseJson = json.decode(response.body);
-      List daftarProduk = responseJson['daftar_produk'];
-      Map data1 = daftarProduk[0];
-      Map lokasi = data1['lokasi'];
-      namaLokasi = lokasi['nama'];
-      idProduk = lokasi['id'];
-      List daftarTempat = lokasi['daftar_tempat'];
-      Map tempat1 = daftarTempat[0];
-      tempatRetribusi = tempat1['nama'];
-      idTempat = tempat1['id'];
-      List daftarProduk1 = tempat1['daftar_produk'];
-      Map daftarProduk2 = daftarProduk1[0];
-      tarif = daftarProduk2['tarif'];
-      return daftarProduk1.map((e) => Produk.fromJson(e)).toList();
-    } else {
-      print(response.body);
-      return null;
-    }
-  }
+  List listObjekRetribusi = [];
 
   void getWidgetData() {
     _npwrd = widget.npwrd;
@@ -118,12 +70,55 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
     _dateNow = widget.dateNow;
   }
 
-  void _getPeriodePenagihan(String periode, int penagihan) {
-    var dateNow = DateTime.now();
+  String _getTerakhirBayar(String tanggal) {
+    var formatTanggal = DateFormat('dd-MM-yyyy');
+    var terakhirBayar = formatTanggal.parse(tanggal);
+    var day = DateFormat('dd').format(terakhirBayar);
+    var month = DateFormat('MM').format(terakhirBayar);
+    var year = DateFormat('yyyy').format(terakhirBayar);
+    var parseBulan;
+    if (month == '01') {
+      parseBulan = 'Januari';
+    } else if (month == '02') {
+      parseBulan = 'Februari';
+    } else if (month == '03') {
+      parseBulan = 'Maret';
+    } else if (month == '04') {
+      parseBulan = 'April';
+    } else if (month == '05') {
+      parseBulan = 'Mei';
+    } else if (month == '06') {
+      parseBulan = 'Juni';
+    } else if (month == '07') {
+      parseBulan = 'Juli';
+    } else if (month == '08') {
+      parseBulan = 'Agustus';
+    } else if (month == '09') {
+      parseBulan = 'September';
+    } else if (month == '10') {
+      parseBulan = 'Oktober';
+    } else if (month == '11') {
+      parseBulan = 'November';
+    } else if (month == '12') {
+      parseBulan = 'Desember';
+    }
+    var tgl = '$day $parseBulan $year';
+    return tgl;
+  }
+
+  void _getPeriodePenagihan(
+      String periode, String periodeTerakhir, int penagihan) {
+    var tglSekarang = DateTime.now();
+    var formatTanggal = DateFormat('dd-MM-yyyy');
+    var dateNow = periodeTerakhir == null
+        ? DateTime.now()
+        : formatTanggal.parse(periodeTerakhir);
     var dayDateNow = DateFormat('dd').format(dateNow);
     var monthDateNow = DateFormat('MM').format(dateNow);
     var yearDateNow = DateFormat('yyyy').format(dateNow);
+    var newYearDateNow = DateFormat('yy').format(dateNow);
     var formatDateNow = DateFormat('ddMMyyyy').format(dateNow);
+    // print('ini format date $formatDateNow');
     var parseMonthDateNow;
     parseMonthDateNow = getMonth(monthDateNow);
     tglPungut = DateFormat('dd-MM-yyyy HH:mm:ss').format(dateNow);
@@ -139,8 +134,11 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
       _newDate = DateTime(
         dateNow.year,
         dateNow.month + (_totalPenagihan == null ? _totalPenagihan : penagihan),
-        dateNow.day,
+        // dateNow.day == dayDateNow ? dateNow.day : dateNow.day - 2,
       );
+      print(_totalPenagihan);
+      print(penagihan);
+      print(_newDate);
     } else if (periode.toLowerCase() == 'tahunan') {
       _newDate = DateTime(
         dateNow.year + (_totalPenagihan == null ? _totalPenagihan : penagihan),
@@ -155,16 +153,57 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
     _formatNewDate = DateFormat('ddMMyyyy').format(_newDate);
     _parseMonth = getMonthPreview(_newMonth);
     _parseMonthPreview = getMonth(_newMonth);
-    if (int.parse(_newMonth) == int.parse(monthDateNow)) {
-      _periodeBayar = '$dayDateNow - $_newDay $_parseMonth $_newYear';
-      _periodeBayarPreview = '$_newDay $_parseMonthPreview $_newYearPreview';
-    } else if (int.parse(_newMonth) > int.parse(monthDateNow)) {
-      _periodeBayar = '$dayDateNow $parseMonthDateNow - $_newDay $_parseMonthPreview $_newYear';
-      _periodeBayarPreview = '$_newDay $_parseMonth $_newYearPreview';
-    } else if (int.parse(_newYear) > int.parse(yearDateNow)) {
-      _periodeBayar = '$dayDateNow $parseMonthDateNow $yearDateNow - $_newDay $_parseMonthPreview $_newYear';
-      _periodeBayarPreview = '$_newDay $_parseMonth $_newYearPreview';
+    _terakhirBayar = '$_newDay $_parseMonth $_newYearPreview';
+    if (int.parse(_newYear) > int.parse(newYearDateNow)) {
+      if (int.parse(_newMonth) == int.parse(monthDateNow)) {
+        if (periode.toLowerCase() == 'bulanan') {
+          _periodeBayar = '$_parseMonth $_newYearPreview qwe';
+        } else {
+          _periodeBayar =
+              '$dayDateNow - $_newDay $_parseMonthPreview $_newYear';
+          _periodeBayarPreview =
+              '$_newDay $_parseMonthPreview $_newYearPreview';
+        }
+      } else if (int.parse(_newMonth) > int.parse(monthDateNow)) {
+        if (periode.toLowerCase() == 'bulanan') {
+          if (penagihan > 1) {
+            _periodeBayar =
+                '$parseMonthDateNow - $_parseMonthPreview $_newYearPreview';
+          } else {
+            _periodeBayar = '$_parseMonthPreview $_newYearPreview';
+          }
+        } else {
+          _periodeBayar =
+              '$dayDateNow $parseMonthDateNow - $_newDay $_parseMonthPreview $_newYear';
+          _periodeBayarPreview = '$_newDay $_parseMonth $_newYearPreview';
+        }
+      }
+      if (periode.toLowerCase() == 'bulanan') {
+        if (penagihan > 1) {
+          _periodeBayar =
+              '$parseMonthDateNow - $_parseMonthPreview $_newYearPreview';
+        } else {
+          _periodeBayar = '$_parseMonth $_newYearPreview';
+        }
+      } else {
+        _periodeBayar =
+            '$dayDateNow $parseMonthDateNow $newYearDateNow - $_newDay $_parseMonthPreview $_newYear';
+        _periodeBayarPreview = '$_newDay $_parseMonth $_newYearPreview';
+      }
+    } else {
+      if (periode.toLowerCase() == 'bulanan') {
+        _periodeBayar = '$_parseMonth $_newYearPreview asd';
+      } else {
+        _periodeBayar =
+            '$dayDateNow $parseMonthDateNow - $_newDay $_parseMonthPreview $_newYear';
+        _periodeBayarPreview = '$_newDay $_parseMonth $_newYearPreview';
+      }
     }
+    //  else if (int.parse(_newYear) > int.parse(newYearDateNow)) {
+    //
+    // }
+    print(
+        '$dayDateNow $parseMonthDateNow $yearDateNow - $_newDay $_parseMonthPreview $_newYear');
     _formatPeriode = '$formatDateNow/$_formatNewDate';
   }
 
@@ -230,113 +269,101 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
   void initState() {
     setState(() {
       getWidgetData();
-      futureData = postRequestProduk(widget.npwrd);
       postRequestProduk(widget.npwrd);
-      print(futureData);
     });
-    // getUser().then((id) {
-    //   _name = id;
-    // });
     super.initState();
   }
 
   void _postRequestCollect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var noHp = prefs.getString('noHp');
-    prefs.setString('npwrd', widget.npwrd);
     prefs.setString('nama_wr', widget.namaWajibRetribusi);
     prefs.setString('jenis_retribusi', widget.jenisRetribusi);
     prefs.setString('jenis_produk', _jenisProduk);
     prefs.setString('nama_lokasi', namaLokasi);
+    prefs.setString('tempat_retribusi', _tempatRetribusi);
     postRequestProduk(widget.npwrd);
-    Map mabs =
-    {
+    Map objekRetribusi = {
       "id_tempat": idTempat.toString(),
       "id_produk": idProduk.toString(),
-      "nominal": tarif.toString(),
-      "periode": _formatNewDate,
+      "nominal":
+          _totalNilai == null ? tarif.toString() : _totalNilai.toString(),
+      "periode": _formatPeriode,
       "jumlah_bayar_maju": _totalPenagihan.toString(),
     };
-    List mab = [];
-    mab.add(mabs);
+    listObjekRetribusi.add(objekRetribusi);
     Map body = {
       'npwrd': _npwrd,
       'tgl_pungut': tglPungut.toString(),
-      'total_setor_pajak_retribusi': _totalNilai == null ? tarif.toString() : _totalNilai.toString(),
-      'objek_retribusi': mab,
+      'total_setor_pajak_retribusi':
+          _totalNilai == null ? tarif.toString() : _totalNilai.toString(),
+      'objek_retribusi': listObjekRetribusi,
       'username': noHp,
-      //   'nominal':
-      //       _parseTotalNilai == null ? _parseNominalPajak : _parseTotalNilai,
-      //   'periode': _formatPeriode,
-      //   'jumlah_bayar': _totalBayar == null ? '1' : _totalBayar,
-      //   'satuan_periode': _periodePenagihan,
     };
     print(body);
-    // await postCollectTax(noHp, body).then((value) {
-    //   if (value != null) {
-    //     postCollectTax(noHp, password, body);
-        print(postCollectTax(noHp, body));
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TransaksiScreen(
-              npwrd: _npwrd,
-              tanggalPenagihan: _dateNow,
-              nominalPajak: tarif.toString(),
-              jenisProduk: _jenisProduk,
-              jenisRetribusi: _jenisRetribusi,
-              lokasiRetribusi: namaLokasi,
-              namaWajibRetribusi: _namaWajibRetribusi,
-              name: _name,
-              periodePenagihan: _periodePenagihan,
-    //           totalNilai: _parseTotalNilai == null
-    //               ? _parseNominalPajak
-    //               : _parseTotalNilai,
-    //           dibayarkan: _totalBayar == null ? '1' : _totalBayar,
-              periodeBayar: _periodeBayar,
+    await postCollectTax(noHp, body).then((value) {
+      if (value != null) {
+        if (value.objekRetribusi.isNotEmpty) {
+          print(value.objekRetribusi);
+          // print(postCollectTax(noHp, body));
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TransaksiScreen(
+                npwrd: _npwrd,
+                tanggalPenagihan: _dateNow,
+                nominalPajak: _totalNilai == null
+                    ? tarif.toString()
+                    : _totalNilai.toString(),
+                jenisProduk: _jenisProduk,
+                jenisRetribusi: _jenisRetribusi,
+                lokasiRetribusi: namaLokasi,
+                namaWajibRetribusi: _namaWajibRetribusi,
+                name: _name,
+                periodePenagihan: _periodePenagihan,
+                tempatRetribusi: _tempatRetribusi,
+                //           totalNilai: _parseTotalNilai == null
+                //               ? _parseNominalPajak
+                //               : _parseTotalNilai,
+                //           dibayarkan: _totalBayar == null ? '1' : _totalBayar,
+                periodeBayar: _periodeBayar,
+              ),
             ),
-          ),
-        );
-      // } else {
-      //   showPop('Pembayaran Gagal', 'Silahkan cek kembali data pembayaran');
-      // }
-    // });
+          );
+        } else {
+          showPop('Pembayaran Gagal', 'Silahkan cek kembali data pembayaran');
+        }
+      }
+    });
   }
 
-  Future<bool> showPop(String title, String message) =>
-      showDialog(
+  Future<bool> showPop(String title, String message) => showDialog(
         context: context,
-        builder: (context) =>
-            AlertDialog(
-              title: Text(
-                title,
-                style: TextStyle(fontSize: 18),
-              ),
-              content: Text(
-                message,
-                style: TextStyle(fontSize: 16),
-                // textAlign: TextAlign.center,
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: Text('TUTUP'),
-                ),
-              ],
+        builder: (context) => AlertDialog(
+          title: Text(
+            title,
+            style: TextStyle(fontSize: 18),
+          ),
+          content: Text(
+            message,
+            style: TextStyle(fontSize: 16),
+            // textAlign: TextAlign.center,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: Text('TUTUP'),
             ),
+          ],
+        ),
       );
   bool shouldPop = true;
 
-  // Future<bool> _onWillPopScope() async {
-  //   return Navigator.of(context).pop(true);
-  // }
   @override
   Widget build(BuildContext context) {
-    final Size size = MediaQuery
-        .of(context)
-        .size;
+    final Size size = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: () async {
         return shouldPop;
@@ -357,21 +384,53 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
           ),
         ),
         body: Container(
-          child: FutureBuilder<List<Produk>>(
+          child: FutureBuilder<List<DaftarProdukAtas>>(
             future: postRequestProduk(widget.npwrd),
             builder: (context, snapshot) {
-              List<Produk> data = snapshot.data;
               if (snapshot.hasData) {
+                List<DaftarProdukAtas> data = snapshot.data;
                 return ListView.builder(
                   physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   itemCount: 1,
                   itemBuilder: (BuildContext context, int index) {
-
+                    idProduk = data[index]
+                        .lokasi
+                        .daftarTempat[index]
+                        .daftarProdukBawah[index]
+                        .idProduk;
+                    print(idProduk);
+                    idTempat = data[index].lokasi.daftarTempat[index].id;
+                    tarif = data[index]
+                        .lokasi
+                        .daftarTempat[index]
+                        .daftarProdukBawah[index]
+                        .tarif;
+                    namaLokasi = data[index].lokasi.nama;
+                    _tempatRetribusi =
+                        data[index].lokasi.daftarTempat[index].nama;
                     _getPeriodePenagihan(
-                        data[index].satuanPeriode, _totalPenagihan);
-                    _jenisProduk = data[index].type;
-                    _periodePenagihan =  data[index].satuanPeriode;
+                        data[index]
+                            .lokasi
+                            .daftarTempat[index]
+                            .daftarProdukBawah[index]
+                            .satuanPeriode,
+                        data[index]
+                            .lokasi
+                            .daftarTempat[index]
+                            .daftarProdukBawah[index]
+                            .periodeTerakhirBayar,
+                        _totalPenagihan);
+                    _jenisProduk = data[index]
+                        .lokasi
+                        .daftarTempat[index]
+                        .daftarProdukBawah[index]
+                        .type;
+                    _periodePenagihan = data[index]
+                        .lokasi
+                        .daftarTempat[index]
+                        .daftarProdukBawah[index]
+                        .satuanPeriode;
                     return Container(
                       height: size.height - 80,
                       child: Stack(
@@ -387,153 +446,143 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                 print(_formatPeriode);
                                 showDialog(
                                   context: context,
-                                  builder: (context) =>
-                                      AlertDialog(
-                                        // title: Text(
-                                        //   title,
-                                        //   style: TextStyle(fontSize: 18),
-                                        // ),
-                                        // content: Text(
-                                        //   message,
-                                        //   style: TextStyle(fontSize: 14),
-                                        //   // textAlign: TextAlign.center,
-                                        // ),
-                                        actions: [
-                                          Container(
-                                            width: size.width,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment
-                                                  .center,
-                                              mainAxisAlignment: MainAxisAlignment
-                                                  .start,
+                                  builder: (context) => AlertDialog(
+                                    // title: Text(
+                                    //   title,
+                                    //   style: TextStyle(fontSize: 18),
+                                    // ),
+                                    // content: Text(
+                                    //   message,
+                                    //   style: TextStyle(fontSize: 14),
+                                    //   // textAlign: TextAlign.center,
+                                    // ),
+                                    actions: [
+                                      Container(
+                                        width: size.width,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            Container(
+                                              width: 92,
+                                              height: 92,
+                                              alignment: Alignment.center,
+                                              // padding: EdgeInsets.all(10),
+                                              decoration: BoxDecoration(
+                                                  color: Color(0xFFF2994A),
+                                                  borderRadius:
+                                                      BorderRadius.circular(50),
+                                                  border: Border.all(
+                                                      width: 2,
+                                                      color: Colors.white)),
+                                              child: FaIcon(
+                                                FontAwesomeIcons.exclamation,
+                                                size: 50,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            SizedBox(height: 12),
+                                            Text(
+                                              _totalNilai == null
+                                                  ? 'Total Bayar : ${NumberFormat.simpleCurrency(locale: 'id', decimalDigits: 0).format(data[index].lokasi.daftarTempat[index].daftarProdukBawah[index].tarif).toString()}'
+                                                  : 'Total Bayar : ${NumberFormat.simpleCurrency(locale: 'id', decimalDigits: 0).format(_totalNilai).toString()}',
+                                              // _parseTotalNilai == null
+                                              //     ? 'Total Bayar : $_parseNominalPajak'
+                                              //     : 'Total Bayar : $_parseTotalNilai',
+                                              style: TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w800,
+                                                  color: Color(0xFF252B42),
+                                                  fontFamily:
+                                                      'opensans regular'),
+                                            ),
+                                            SizedBox(
+                                              height: 5,
+                                            ),
+                                            Text(
+                                              'Yakin akan melanjutkan transaksi?',
+                                              style: TextStyle(
+                                                  fontSize: 14,
+                                                  fontWeight: FontWeight.w700,
+                                                  color: Color(0xFF252B42),
+                                                  fontFamily:
+                                                      'opensans regular'),
+                                            ),
+                                            SizedBox(
+                                              height: 11,
+                                            ),
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
                                               children: [
-                                                Container(
-                                                  width: 92,
-                                                  height: 92,
-                                                  alignment: Alignment.center,
-                                                  // padding: EdgeInsets.all(10),
-                                                  decoration: BoxDecoration(
-                                                      color: Color(0xFFF2994A),
-                                                      borderRadius: BorderRadius
-                                                          .circular(50),
-                                                      border: Border.all(
-                                                          width: 2,
-                                                          color: Colors.white)),
-                                                  child: FaIcon(
-                                                    FontAwesomeIcons
-                                                        .exclamation,
-                                                    size: 50,
-                                                    color: Colors.white,
+                                                MaterialButton(
+                                                  minWidth: 115,
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  color: Color(0xFFFFFFFF),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            18.0),
+                                                    side: BorderSide(
+                                                      color: Color(
+                                                        0xFF01A190,
+                                                      ),
+                                                      width: 1.0,
+                                                    ),
+                                                  ),
+                                                  child: Text(
+                                                    'Tidak',
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color:
+                                                            Color(0xFF009A8A),
+                                                        fontFamily:
+                                                            'opensans regular'),
                                                   ),
                                                 ),
-                                                SizedBox(height: 12),
-                                                Text(
-                                                  _totalNilai == null
-                                                      ? NumberFormat
-                                                      .simpleCurrency(
-                                                      locale: 'id',
-                                                      decimalDigits: 0)
-                                                      .format(data[index].tarif)
-                                                      .toString()
-                                                      : NumberFormat
-                                                      .simpleCurrency(
-                                                      locale: 'id',
-                                                      decimalDigits: 0)
-                                                      .format(_totalNilai)
-                                                      .toString(),
-                                                  // _parseTotalNilai == null
-                                                  //     ? 'Total Bayar : $_parseNominalPajak'
-                                                  //     : 'Total Bayar : $_parseTotalNilai',
-                                                  style: TextStyle(
-                                                      fontSize: 18,
-                                                      fontWeight: FontWeight
-                                                          .w800,
-                                                      color: Color(0xFF252B42),
-                                                      fontFamily: 'opensans regular'),
-                                                ),
-                                                SizedBox(
-                                                  height: 5,
-                                                ),
-                                                Text(
-                                                  'Yakin akan melanjutkan transaksi?',
-                                                  style: TextStyle(
-                                                      fontSize: 14,
-                                                      fontWeight: FontWeight
-                                                          .w700,
-                                                      color: Color(0xFF252B42),
-                                                      fontFamily: 'opensans regular'),
-                                                ),
-                                                SizedBox(
-                                                  height: 11,
-                                                ),
-                                                Row(
-                                                  mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                                  children: [
-                                                    MaterialButton(
-                                                      minWidth: 115,
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      color: Color(0xFFFFFFFF),
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius:
+                                                MaterialButton(
+                                                  minWidth: 115,
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                    _postRequestCollect();
+                                                  },
+                                                  color: Color(0xFF01A190),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
                                                         BorderRadius.circular(
                                                             18.0),
-                                                        side: BorderSide(
-                                                          color: Color(
-                                                            0xFF01A190,
-                                                          ),
-                                                          width: 1.0,
-                                                        ),
+                                                    side: BorderSide(
+                                                      color: Color(
+                                                        0xFF01A190,
                                                       ),
-                                                      child: Text(
-                                                        'Tidak',
-                                                        style: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight: FontWeight
-                                                                .w700,
-                                                            color: Color(
-                                                                0xFF009A8A),
-                                                            fontFamily: 'opensans regular'),
-                                                      ),
+                                                      width: 1.0,
                                                     ),
-                                                    MaterialButton(
-                                                      minWidth: 115,
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                        _postRequestCollect();
-                                                      },
-                                                      color: Color(0xFF01A190),
-                                                      shape: RoundedRectangleBorder(
-                                                        borderRadius:
-                                                        BorderRadius.circular(
-                                                            18.0),
-                                                        side: BorderSide(
-                                                          color: Color(
-                                                            0xFF01A190,
-                                                          ),
-                                                          width: 1.0,
-                                                        ),
-                                                      ),
-                                                      child: Text(
-                                                        'Proses',
-                                                        style: TextStyle(
-                                                            fontSize: 14,
-                                                            fontWeight: FontWeight
-                                                                .w700,
-                                                            color: Color(
-                                                                0xFFFFFFFF),
-                                                            fontFamily: 'opensans regular'),
-                                                      ),
-                                                    ),
-                                                  ],
+                                                  ),
+                                                  child: Text(
+                                                    'Proses',
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w700,
+                                                        color:
+                                                            Color(0xFFFFFFFF),
+                                                        fontFamily:
+                                                            'opensans regular'),
+                                                  ),
                                                 ),
                                               ],
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
+                                    ],
+                                  ),
                                 );
                               },
                               child: Text(
@@ -596,25 +645,25 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                         children: [
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'NPWRD',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
@@ -626,32 +675,32 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
                                           SizedBox(height: 11),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Wajib Retribusi',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
@@ -663,7 +712,7 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -672,25 +721,25 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Jenis Retribusi',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
@@ -702,7 +751,7 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -711,37 +760,41 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Jenis Produk',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
                                                 ),
                                               ),
                                               Text(
-                                                data[index].type,
+                                                data[index]
+                                                    .lokasi
+                                                    .daftarTempat[index]
+                                                    .daftarProdukBawah[index]
+                                                    .type,
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -750,25 +803,25 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
-                                                      'Penanggung Jawab',
+                                                      'Kolektor',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
@@ -780,7 +833,7 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -789,37 +842,42 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Periode Penagihan',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
                                                 ),
                                               ),
                                               Text(
-                                                data[index].satuanPeriode,
+                                                data[index]
+                                                    .lokasi
+                                                    .daftarTempat[index]
+                                                    .daftarProdukBawah[index]
+                                                    .satuanPeriode,
+                                                // 'data[index].satuanPeriode',
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -828,37 +886,37 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Lokasi Retribusi',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
                                                 ),
                                               ),
                                               Text(
-                                                namaLokasi,
+                                                data[index].lokasi.nama,
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -867,37 +925,40 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Tempat Retribusi',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
                                                 ),
                                               ),
                                               Text(
-                                                tempatRetribusi,
+                                                data[index]
+                                                    .lokasi
+                                                    .daftarTempat[index]
+                                                    .nama,
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -906,37 +967,51 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Terakhir Bayar',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
                                                 ),
                                               ),
                                               Text(
-                                                _dateNow.toString(),
+                                                data[index]
+                                                            .lokasi
+                                                            .daftarTempat[index]
+                                                            .daftarProdukBawah[
+                                                                index]
+                                                            .terakhirBayar ==
+                                                        null
+                                                    ? '-'
+                                                    : _getTerakhirBayar(
+                                                        data[index]
+                                                            .lokasi
+                                                            .daftarTempat[index]
+                                                            .daftarProdukBawah[
+                                                                index]
+                                                            .terakhirBayar),
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -945,33 +1020,33 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Column(
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                      CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      'Penagihan',
+                                                      'Periode Bayar',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(
-                                                      _periodeBayarPreview.toString(),
+                                                      _periodeBayar.toString(),
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF3B414B),
+                                                              Color(0xFF3B414B),
                                                           fontWeight:
-                                                          FontWeight.w600,
-                                                          fontSize: 14),
+                                                              FontWeight.w600,
+                                                          fontSize: 12),
                                                     ),
                                                   ],
                                                 ),
@@ -983,51 +1058,68 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                   color: Color(0xFFFF9000),
                                                   // border: Border.all(color: Colors.grey),
                                                   borderRadius:
-                                                  BorderRadius.circular(30.0),
+                                                      BorderRadius.circular(
+                                                          30.0),
                                                 ),
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceAround,
+                                                      MainAxisAlignment
+                                                          .spaceAround,
                                                   children: [
                                                     _totalPenagihan == 1
                                                         ? Text(
-                                                      '-',
-                                                      style: TextStyle(
-                                                          color:
-                                                          Colors.white,
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                          FontWeight
-                                                              .w700),
-                                                    )
+                                                            '-',
+                                                            style: TextStyle(
+                                                                color: Colors
+                                                                    .white,
+                                                                fontSize: 18,
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w700),
+                                                          )
                                                         : GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          _totalPenagihan =
-                                                              _totalPenagihan -
-                                                                  1;
-                                                          _totalNilai = data[
-                                                          index]
-                                                              .tarif *
-                                                              _totalPenagihan;
-                                                          _getPeriodePenagihan(
-                                                              data[index]
-                                                                  .satuanPeriode,
-                                                              _totalPenagihan);
-                                                        });
-                                                      },
-                                                      child: Text(
-                                                        '-',
-                                                        style: TextStyle(
-                                                            color: Colors
-                                                                .white,
-                                                            fontSize: 18,
-                                                            fontWeight:
-                                                            FontWeight
-                                                                .w700),
-                                                      ),
-                                                    ),
+                                                            onTap: () {
+                                                              setState(() {
+                                                                _totalPenagihan =
+                                                                    _totalPenagihan -
+                                                                        1;
+                                                                _totalNilai = data[index]
+                                                                        .lokasi
+                                                                        .daftarTempat[
+                                                                            index]
+                                                                        .daftarProdukBawah[
+                                                                            index]
+                                                                        .tarif *
+                                                                    _totalPenagihan;
+                                                                _getPeriodePenagihan(
+                                                                    data[index]
+                                                                        .lokasi
+                                                                        .daftarTempat[
+                                                                            index]
+                                                                        .daftarProdukBawah[
+                                                                            index]
+                                                                        .satuanPeriode,
+                                                                    data[index]
+                                                                        .lokasi
+                                                                        .daftarTempat[
+                                                                            index]
+                                                                        .daftarProdukBawah[
+                                                                            index]
+                                                                        .periodeTerakhirBayar,
+                                                                    _totalPenagihan);
+                                                              });
+                                                            },
+                                                            child: Text(
+                                                              '-',
+                                                              style: TextStyle(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  fontSize: 18,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w700),
+                                                            ),
+                                                          ),
                                                     Text(
                                                       _totalPenagihan
                                                           .toString(),
@@ -1035,7 +1127,7 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                           color: Colors.white,
                                                           fontSize: 18,
                                                           fontWeight:
-                                                          FontWeight.w700),
+                                                              FontWeight.w700),
                                                     ),
                                                     GestureDetector(
                                                       onTap: () {
@@ -1043,13 +1135,30 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                           _totalPenagihan =
                                                               _totalPenagihan +
                                                                   1;
-                                                          _totalNilai =
-                                                              data[index]
+                                                          _totalNilai = data[
+                                                                      index]
+                                                                  .lokasi
+                                                                  .daftarTempat[
+                                                                      index]
+                                                                  .daftarProdukBawah[
+                                                                      index]
                                                                   .tarif *
-                                                                  _totalPenagihan;
+                                                              _totalPenagihan;
                                                           _getPeriodePenagihan(
                                                               data[index]
+                                                                  .lokasi
+                                                                  .daftarTempat[
+                                                                      index]
+                                                                  .daftarProdukBawah[
+                                                                      index]
                                                                   .satuanPeriode,
+                                                              data[index]
+                                                                  .lokasi
+                                                                  .daftarTempat[
+                                                                      index]
+                                                                  .daftarProdukBawah[
+                                                                      index]
+                                                                  .periodeTerakhirBayar,
                                                               _totalPenagihan);
                                                         });
                                                       },
@@ -1059,7 +1168,8 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                             color: Colors.white,
                                                             fontSize: 18,
                                                             fontWeight:
-                                                            FontWeight.w700),
+                                                                FontWeight
+                                                                    .w700),
                                                       ),
                                                     ),
                                                   ],
@@ -1080,25 +1190,25 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                           ),
                                           Row(
                                             mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                                MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 135,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Nilai Retribusi',
                                                       style: TextStyle(
                                                           color:
-                                                          Color(0xFF757F8C),
+                                                              Color(0xFF757F8C),
                                                           fontSize: 14,
                                                           fontWeight:
-                                                          FontWeight.w400,
+                                                              FontWeight.w400,
                                                           fontFamily:
-                                                          'opensans regular'),
+                                                              'opensans regular'),
                                                     ),
                                                     Text(':'),
                                                   ],
@@ -1107,22 +1217,68 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                               Text(
                                                 _totalNilai == null
                                                     ? NumberFormat
-                                                    .simpleCurrency(
-                                                    locale: 'id',
-                                                    decimalDigits: 0)
-                                                    .format(data[index].tarif)
-                                                    .toString()
+                                                            .simpleCurrency(
+                                                                locale: 'id',
+                                                                decimalDigits:
+                                                                    0)
+                                                        .format(data[index]
+                                                            .lokasi
+                                                            .daftarTempat[index]
+                                                            .daftarProdukBawah[
+                                                                index]
+                                                            .tarif)
+                                                        .toString()
                                                     : NumberFormat
-                                                    .simpleCurrency(
-                                                    locale: 'id',
-                                                    decimalDigits: 0)
-                                                    .format(_totalNilai)
-                                                    .toString(),
+                                                            .simpleCurrency(
+                                                                locale: 'id',
+                                                                decimalDigits:
+                                                                    0)
+                                                        .format(_totalNilai)
+                                                        .toString(),
                                                 style: TextStyle(
                                                     fontSize: 14,
                                                     fontWeight: FontWeight.w600,
                                                     fontFamily:
-                                                    'opensans regular'),
+                                                        'opensans regular'),
+                                              ),
+                                            ],
+                                          ),
+                                          SizedBox(
+                                            height: 11,
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                width: 135,
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Text(
+                                                      'Tanggal Penagihan',
+                                                      style: TextStyle(
+                                                          color:
+                                                              Color(0xFF757F8C),
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          fontFamily:
+                                                              'opensans regular'),
+                                                    ),
+                                                    Text(':'),
+                                                  ],
+                                                ),
+                                              ),
+                                              Text(
+                                                _dateNow.toString(),
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w600,
+                                                    fontFamily:
+                                                        'opensans regular'),
                                               ),
                                             ],
                                           ),
@@ -1160,8 +1316,8 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                   Padding(
                                     padding: EdgeInsets.only(left: 25),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment
-                                          .start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
                                       children: [
                                         Text('Metode Pembayaran',
                                             style: TextStyle(
@@ -1174,9 +1330,9 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                   GestureDetector(
                                     onTap: () {
                                       ScaffoldMessenger.of(context)
-                                          .showSnackBar(
-                                          SnackBar(content: Text(
-                                              'Under Development')));
+                                          .showSnackBar(SnackBar(
+                                              content:
+                                                  Text('Under Development')));
                                       // Navigator.push(
                                       //   context,
                                       //   MaterialPageRoute(
@@ -1187,8 +1343,8 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                     child: Card(
                                       margin: EdgeInsets.all(24),
                                       shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(
-                                            16.0),
+                                        borderRadius:
+                                            BorderRadius.circular(16.0),
                                         side: BorderSide(
                                             color: Color(0xFFBDBDBD), width: 1),
                                       ),
@@ -1196,18 +1352,19 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                       child: Container(
                                         padding: EdgeInsets.all(18),
                                         child: Row(
-                                          mainAxisAlignment: MainAxisAlignment
-                                              .spaceBetween,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
                                             Row(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
+                                                  MainAxisAlignment.spaceEvenly,
                                               children: [
                                                 Container(
                                                     padding: EdgeInsets.all(2),
                                                     decoration: BoxDecoration(
-                                                      borderRadius: BorderRadius
-                                                          .circular(8),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8),
                                                       color: Color(0xFFFFFFFF),
                                                       boxShadow: [
                                                         BoxShadow(
@@ -1224,14 +1381,14 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
                                                   'Pembayaran Cash',
                                                   style: TextStyle(
                                                       fontSize: 12,
-                                                      fontWeight: FontWeight
-                                                          .w700),
+                                                      fontWeight:
+                                                          FontWeight.w700),
                                                 ),
                                               ],
                                             ),
                                             Row(
                                               mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
+                                                  MainAxisAlignment.spaceAround,
                                               children: [
                                                 Text(
                                                   'Lihat Semua',
@@ -1272,9 +1429,7 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
 }
 
 Widget _dash(BuildContext context) {
-  final Size size = MediaQuery
-      .of(context)
-      .size;
+  final Size size = MediaQuery.of(context).size;
   final dashWidth = 10.0;
   final dashCount = (size.width / (2 * dashWidth)).floor();
   return Padding(
