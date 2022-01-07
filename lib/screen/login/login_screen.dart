@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simpada/data/api/api_service.dart';
-import 'package:simpada/data/model/simpada_retribusi.dart';
+import 'package:simpada/data/model/generate_token_model.dart';
+import 'package:simpada/data/model/login_model.dart';
+import 'package:simpada/data/model/registrasi_model.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
-import 'package:simpada/screen/login/registrasi_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key key}) : super(key: key);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
+import 'package:simpada/data/model/profile_model.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
 import 'package:simpada/screen/scan/preview_scan_screen.dart';
 

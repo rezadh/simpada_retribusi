@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simpada/data/api/api_service.dart';
-import 'package:simpada/data/model/simpada_retribusi.dart';
+import 'package:simpada/data/model/history_bill_model.dart';
 import 'package:simpada/screen/generate/detail_penyetoran_screen.dart';
-import 'package:simpada/screen/riwayat/bukti_bayar_riwayat_screen.dart';
+import 'dart:convert';
 
 class DaftarBillingPage extends StatefulWidget {
   const DaftarBillingPage({Key key}) : super(key: key);
@@ -14,7 +14,9 @@ class DaftarBillingPage extends StatefulWidget {
 }
 
 Widget _dash(BuildContext context) {
-  final Size size = MediaQuery.of(context).size;
+  final Size size = MediaQuery
+      .of(context)
+      .size;
   final dashWidth = 10.0;
   final dashCount = (size.width / (2 * dashWidth)).floor();
   return Padding(
@@ -37,33 +39,17 @@ Widget _dash(BuildContext context) {
 
 class _DaftarBillingPageState extends State<DaftarBillingPage> {
   var _name;
-  var _username;
-  var _tglBayar;
-  var _kodeBilling;
   List daftarNTRD = [];
   List daftarTanggal = [];
   List daftarNilai = [];
   bool loading = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      new GlobalKey<RefreshIndicatorState>();
+  new GlobalKey<RefreshIndicatorState>();
 
   getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _name = prefs.getString('name');
-    _username = prefs.getString('noHp');
-    _tglBayar = prefs.getString('tanggal_bayar');
-    _kodeBilling = prefs.getString('billcode');
     return _name;
-  }
-
-  _getDateTime(String date) {
-    DateTime dateFormat = DateFormat('dd-MM-yyyy').parse(date);
-    var day = DateFormat('dd').format(dateFormat);
-    var month = DateFormat('MM').format(dateFormat);
-    var year = DateFormat('yyyy').format(dateFormat);
-    var parseMonth = getMonth(month);
-    String dateTime = '$day $parseMonth $year';
-    return dateTime;
   }
 
   String getMonth(String month) {
@@ -95,6 +81,79 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
     return null;
   }
 
+  Future<bool> showPopGagal(String title, String message) =>
+      showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) =>
+            AlertDialog(
+              title: Text(
+                title,
+                style: TextStyle(fontSize: 18),
+              ),
+              content: Text(
+                message,
+                style: TextStyle(fontSize: 14),
+                // textAlign: TextAlign.center,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text('TUTUP'),
+                ),
+              ],
+            ),
+      );
+
+
+  static const platformMethodChannel = const MethodChannel('com.pac.print/edc');
+
+  Future<bool> _initPrinter() async {
+    try {
+      final bool result = await platformMethodChannel.invokeMethod('connect');
+      return result;
+    } on PlatformException {
+      return false;
+    }
+  }
+
+  Future _printData(String kodeBilling, String tglKedaluarsa, String periode,
+      String nominal) async {
+    await _initPrinter().then((value) {
+      if (!value) {
+        return;
+      }
+    });
+    var formatTanggal = DateFormat('dd-MM-yyyy');
+    var tglDibentuk = formatTanggal.parse(periode);
+    var bulan = DateFormat('MM').format(tglDibentuk);
+    var tahun = DateFormat('yyyy').format(tglDibentuk);
+    List<String> items = [
+      '\n-------------------------------\n',
+    ];
+    Map data = {
+      'header': 'Kode Billing\n',
+      'kode': kodeBilling,
+      'info': 'Tanggal Kedaluarsa',
+      'tanggal': tglKedaluarsa,
+      'items': items,
+      'info2': 'Total Setor Retribusi',
+      'periode': 'Periode ${getMonth(bulan)} $tahun',
+      'nominal': nominal
+    };
+    String payload = json.encode(data);
+    try {
+      final int result = await platformMethodChannel.invokeMethod(payload);
+      if (result != 0) {
+        showPopGagal('GAGAL', 'Gagal print struk');
+      }
+    } on PlatformException {
+      showPopGagal('GAGAL', 'Gagal print struk');
+    }
+  }
+
   @override
   void initState() {
     setState(() {
@@ -112,7 +171,10 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
         key: _refreshIndicatorKey,
         onRefresh: postRequestSetoranBill,
         child: Container(
-          height: MediaQuery.of(context).size.height,
+          height: MediaQuery
+              .of(context)
+              .size
+              .height,
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(
                 parent: AlwaysScrollableScrollPhysics()),
@@ -127,7 +189,6 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                         physics: NeverScrollableScrollPhysics(),
                         shrinkWrap: true,
                         itemBuilder: (context, index) {
-
                           return Container(
                             padding: EdgeInsets.only(top: 15),
                             child: Column(
@@ -137,7 +198,9 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                     daftarNTRD.clear();
                                     daftarTanggal.clear();
                                     daftarNilai.clear();
-                                    for(int i = 0; i < data[index].listBilingNTRD.length; i++){
+                                    for (int i = 0;
+                                    i < data[index].listBilingNTRD.length;
+                                    i++) {
                                       daftarNTRD.add(
                                           data[index].listBilingNTRD[i].ntrd);
                                       print(data[index].listBilingNTRD[i].ntrd);
@@ -148,13 +211,16 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                           .listBilingNTRD[i]
                                           .nominalTagihan);
                                     }
-                                    Navigator.of(context, rootNavigator: true).push(
+                                    Navigator.of(context, rootNavigator: true)
+                                        .push(
                                       MaterialPageRoute(
-                                          builder: (context) => DetailPenyetoranScreen(
-                                            ntrd: daftarNTRD,
-                                            nilai: daftarNilai,
-                                            tanggal: daftarTanggal,
-                                          ),),
+                                        builder: (context) =>
+                                            DetailPenyetoranScreen(
+                                              ntrd: daftarNTRD,
+                                              nilai: daftarNilai,
+                                              tanggal: daftarTanggal,
+                                            ),
+                                      ),
                                     );
                                     // Navigator.push(
                                     //   context,
@@ -188,7 +254,7 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                   },
                                   child: Card(
                                     margin:
-                                        EdgeInsets.only(left: 25, right: 25),
+                                    EdgeInsets.only(left: 25, right: 25),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(15.0),
                                     ),
@@ -199,25 +265,25 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                         children: [
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 132,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Kode Billing',
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                            'opensans regular',
+                                                        'opensans regular',
                                                         fontWeight:
-                                                            FontWeight.w400,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xFF4F4F4F),
+                                                        Color(0xFF4F4F4F),
                                                       ),
                                                     ),
                                                     Text(
@@ -234,35 +300,46 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily:
-                                                      'opensans regular',
+                                                  'opensans regular',
                                                   fontWeight: FontWeight.w600,
                                                   color: Color(0xFF4F4F4F),
                                                 ),
                                               ),
+                                              GestureDetector(
+                                                  onTap: () {
+                                                    _printData(data[index]
+                                                        .kodeBilling, data[index].tglKedaluwarsa, data[index].tglDibentuk, NumberFormat.simpleCurrency(
+                                                    locale: 'id',
+                                                        decimalDigits: 0)
+                                                        .format(double.parse(
+                                                        data[index].nominal)));
+                                                  },
+                                                  child: Image.asset(
+                                                      'images/cetak.png')),
                                             ],
                                           ),
                                           _dash(context),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 132,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Tanggal Kedaluwarsa',
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                            'opensans regular',
+                                                        'opensans regular',
                                                         fontWeight:
-                                                            FontWeight.w400,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xFF4F4F4F),
+                                                        Color(0xFF4F4F4F),
                                                       ),
                                                     ),
                                                     Text(
@@ -281,9 +358,9 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w600,
+                                                      FontWeight.w600,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -312,25 +389,25 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                           _dash(context),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 132,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Total Nilai Retribusi',
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                            'opensans regular',
+                                                        'opensans regular',
                                                         fontWeight:
-                                                            FontWeight.w400,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xFF4F4F4F),
+                                                        Color(0xFF4F4F4F),
                                                       ),
                                                     ),
                                                     Text(
@@ -344,14 +421,14 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                               ),
                                               Text(
                                                 NumberFormat.simpleCurrency(
-                                                        locale: 'id',
-                                                        decimalDigits: 0)
+                                                    locale: 'id',
+                                                    decimalDigits: 0)
                                                     .format(double.parse(
-                                                        data[index].nominal)),
+                                                    data[index].nominal)),
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily:
-                                                      'opensans regular',
+                                                  'opensans regular',
                                                   fontWeight: FontWeight.w600,
                                                 ),
                                               ),
@@ -360,25 +437,25 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                           _dash(context),
                                           Row(
                                             mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
+                                            MainAxisAlignment.spaceBetween,
                                             children: [
                                               Container(
                                                 width: 132,
                                                 child: Row(
                                                   mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
                                                   children: [
                                                     Text(
                                                       'Status',
                                                       style: TextStyle(
                                                         fontSize: 12,
                                                         fontFamily:
-                                                            'opensans regular',
+                                                        'opensans regular',
                                                         fontWeight:
-                                                            FontWeight.w400,
+                                                        FontWeight.w400,
                                                         color:
-                                                            Color(0xFF4F4F4F),
+                                                        Color(0xFF4F4F4F),
                                                       ),
                                                     ),
                                                     Text(
@@ -394,20 +471,20 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                                 data[index].status == '0'
                                                     ? 'Menunggu Penyetoran'
                                                     : data[index].status == '1'
-                                                        ? 'Selesai'
-                                                        : 'Expired',
+                                                    ? 'Selesai'
+                                                    : 'Expired',
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontFamily:
-                                                      'opensans regular',
+                                                  'opensans regular',
                                                   fontWeight: FontWeight.w600,
                                                   color: data[index].status ==
-                                                          '0'
+                                                      '0'
                                                       ? Color(0xFFF2994A)
                                                       : data[index].status ==
-                                                              '1'
-                                                          ? Color(0xFF27AE60)
-                                                          : Colors.red,
+                                                      '1'
+                                                      ? Color(0xFF27AE60)
+                                                      : Colors.red,
                                                 ),
                                               ),
                                             ],
@@ -417,11 +494,12 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                                             decoration: BoxDecoration(
                                               color: Colors.blue,
                                               borderRadius:
-                                                  BorderRadius.circular(15.0),
+                                              BorderRadius.circular(15.0),
                                               // border: Border.all(width: 2, color: Colors.white),
                                             ),
                                             padding: EdgeInsets.all(5),
-                                            width: MediaQuery.of(context)
+                                            width: MediaQuery
+                                                .of(context)
                                                 .size
                                                 .width,
                                             child: Text(
@@ -444,7 +522,10 @@ class _DaftarBillingPageState extends State<DaftarBillingPage> {
                         });
                   } else {
                     return Container(
-                      height: MediaQuery.of(context).size.height - 165,
+                      height: MediaQuery
+                          .of(context)
+                          .size
+                          .height - 165,
                       child: Center(
                         child: Text('Data tidak ada'),
                       ),

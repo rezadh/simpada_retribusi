@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simpada/data/api/api_service.dart';
-import 'package:simpada/data/model/simpada_retribusi.dart';
-import 'package:simpada/screen/riwayat/bukti_bayar_riwayat_screen.dart';
-
+import 'package:simpada/data/model/history_bill_model.dart';
 import 'detail_penyetoran_screen.dart';
 
 class RiwayatPenyetoranPage extends StatefulWidget {

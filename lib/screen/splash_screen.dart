@@ -2,9 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simpada/data/api/api_service.dart';
+import 'package:simpada/data/model/generate_token_model.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
-import 'package:simpada/screen/login/registrasi_screen.dart';
 
 import 'login/login_screen.dart';
 

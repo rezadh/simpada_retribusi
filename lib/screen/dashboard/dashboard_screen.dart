@@ -6,7 +6,7 @@ import 'package:simpada/screen/generate/daftar_setoran_screen.dart';
 import 'package:simpada/screen/generate/generate_page.dart';
 import 'package:simpada/screen/profile/akun_screen.dart';
 import 'package:simpada/screen/riwayat/riwayat_screen.dart';
-import 'package:simpada/screen/riwayat/transaksi_page.dart';
+import 'package:simpada/screen/riwayat/sudah_generate_page.dart';
 import 'package:simpada/screen/scan/scan_screen.dart';
 
 final List<String> imagesList = [
@@ -325,7 +325,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                                   context,
                                                   MaterialPageRoute(
                                                     builder: (context) =>
-                                                        TransaksiPage(),
+                                                        RiwayatScreen(),
                                                   ),
                                                 );
                                               },

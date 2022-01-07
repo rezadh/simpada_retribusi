@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:simpada/data/api/api_service.dart';
-import 'package:simpada/data/model/simpada_retribusi.dart';
+import 'package:simpada/data/model/history_bill_model.dart';
 
 class DetailPenyetoranScreen extends StatefulWidget {
   DetailPenyetoranScreen({List<dynamic> ntrd, List<dynamic> nilai, List<

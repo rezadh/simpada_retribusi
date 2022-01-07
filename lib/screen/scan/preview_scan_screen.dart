@@ -3,6 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
+import 'package:simpada/data/model/collect_tax_model.dart';
+import 'package:simpada/data/model/daftar_produk_model.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
 import 'package:simpada/screen/transaksi/transaksi_screen.dart';
 
@@ -157,7 +159,7 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
     if (int.parse(_newYear) > int.parse(newYearDateNow)) {
       if (int.parse(_newMonth) == int.parse(monthDateNow)) {
         if (periode.toLowerCase() == 'bulanan') {
-          _periodeBayar = '$_parseMonth $_newYearPreview qwe';
+          _periodeBayar = '$_parseMonth $_newYearPreview';
         } else {
           _periodeBayar =
               '$dayDateNow - $_newDay $_parseMonthPreview $_newYear';
@@ -179,11 +181,20 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
         }
       }
       if (periode.toLowerCase() == 'bulanan') {
-        if (penagihan > 1) {
-          _periodeBayar =
-              '$parseMonthDateNow - $_parseMonthPreview $_newYearPreview';
-        } else {
-          _periodeBayar = '$_parseMonth $_newYearPreview';
+        if(int.parse(_newYear) > int.parse(newYearDateNow)){
+          if (penagihan > 1) {
+            _newDate = DateTime(
+              dateNow.year,
+              dateNow.month + (_totalPenagihan == null ? _totalPenagihan : penagihan - penagihan + 1),
+            );
+            var monthNew = DateFormat('MM').format(_newDate);
+            var tahunBaru = DateFormat('yy').format(_newDate);
+            parseMonthDateNow = getMonth(monthNew);
+            _periodeBayar =
+            '$parseMonthDateNow $tahunBaru - $_parseMonthPreview $_newYear';
+          } else {
+            _periodeBayar = '$_parseMonth $_newYearPreview';
+          }
         }
       } else {
         _periodeBayar =
@@ -192,7 +203,23 @@ class _PreviewScanScreenState extends State<PreviewScanScreen> {
       }
     } else {
       if (periode.toLowerCase() == 'bulanan') {
-        _periodeBayar = '$_parseMonth $_newYearPreview asd';
+        if (penagihan > 1) {
+          _newDate = DateTime(
+            dateNow.year,
+            dateNow.month + (_totalPenagihan == null ? _totalPenagihan : penagihan - penagihan + 1),
+          );
+          var newYear = DateTime(
+            dateNow.year,
+            dateNow.month + _totalPenagihan,
+          );
+          var monthNew = DateFormat('MM').format(_newDate);
+          var tahunBaru = DateFormat('yy').format(_newDate);
+          parseMonthDateNow = getMonth(monthNew);
+          _periodeBayar =
+          '$parseMonthDateNow $tahunBaru - $_parseMonthPreview $_newYear';
+        } else {
+          _periodeBayar = '$_parseMonth $_newYearPreview';
+        }
       } else {
         _periodeBayar =
             '$dayDateNow $parseMonthDateNow - $_newDay $_parseMonthPreview $_newYear';

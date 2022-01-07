@@ -2,16 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simpada/data/api/api_service.dart';
-import 'package:simpada/data/model/simpada_retribusi.dart';
-import 'package:simpada/screen/dashboard/dashboard_screen.dart';
+import 'package:simpada/data/model/last_payment_model.dart';
 import 'package:simpada/screen/riwayat/bukti_bayar_riwayat_screen.dart';
 
-class TransaksiPage extends StatefulWidget {
-  const TransaksiPage({Key key}) : super(key: key);
+class BelumGeneratePage extends StatefulWidget {
+  const BelumGeneratePage({Key key}) : super(key: key);
 
   @override
-  _TransaksiPageState createState() => _TransaksiPageState();
+  _BelumGeneratePageState createState() => _BelumGeneratePageState();
 }
 
 Widget _dash(BuildContext context) {
@@ -36,57 +34,25 @@ Widget _dash(BuildContext context) {
   );
 }
 
-class _TransaksiPageState extends State<TransaksiPage> {
+class _BelumGeneratePageState extends State<BelumGeneratePage> {
   var _name;
   var _waktu;
-  List<dynamic> _listNpwrd = [];
   var tglPungut;
   int idProduk;
   int idTempat;
   int tarif;
   String namaLokasi;
   String tempatRetribusi;
-  String _jenisRetribusi;
-  String _namaWajibRetribusi;
-  String _tempatRetribusi;
-  String _jenisProduk;
-  String _namaLokasi;
   var _dateNow;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-      new GlobalKey<RefreshIndicatorState>();
+  new GlobalKey<RefreshIndicatorState>();
 
   getUser() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     _name = prefs.getString('name');
-    // _npwrd = prefs.getString('npwrd');
-    // _namaWajibRetribusi = prefs.getString('nama_wr');
-    // _jenisRetribusi = prefs.getString('jenis_retribusi');
-    // _tempatRetribusi = prefs.getString('tempat_retribusi');
-    // _jenisProduk = prefs.getString('jenis_produk');
-    // _namaLokasi = prefs.getString('nama_lokasi');
     return _name;
   }
 
-  void requestProduk(String npwrd) async {
-    await postRequestProduk(npwrd).then((value) async {
-      if (value != null) {
-        setState(() {
-          _jenisRetribusi = 'Pasar';
-          _namaLokasi = value[0].lokasi.nama;
-          _jenisProduk =
-              value[0].lokasi.daftarTempat[0].daftarProdukBawah[0].type;
-          _tempatRetribusi = value[0].lokasi.daftarTempat[0].nama;
-        });
-      }
-      await postRequestProfile(_listNpwrd).then((value) {
-        if (value != null) {
-          setState(() {
-            _namaWajibRetribusi = value[0].namaWr;
-          });
-        }
-      });
-    });
-  }
 
   _getDate(String _date) {
     DateTime dateFormat = DateFormat('dd-MM-yyyy').parse(_date);
@@ -123,48 +89,8 @@ class _TransaksiPageState extends State<TransaksiPage> {
     return _dateNow;
   }
 
-  // _getDateNow() {
-  //   var dateNow = DateTime.now();
-  //   var day = DateFormat('dd').format(dateNow);
-  //   var month = DateFormat('MM').format(dateNow);
-  //   var year = DateFormat('yy').format(dateNow);
-  //   String parseMonth;
-  //   if (month == '01') {
-  //     parseMonth = 'Jan';
-  //   } else if (month == '02') {
-  //     parseMonth = 'Feb';
-  //   } else if (month == '03') {
-  //     parseMonth = 'Mar';
-  //   } else if (month == '04') {
-  //     parseMonth = 'Apr';
-  //   } else if (month == '05') {
-  //     parseMonth = 'Mei';
-  //   } else if (month == '06') {
-  //     parseMonth = 'Jun';
-  //   } else if (month == '07') {
-  //     parseMonth = 'Jul';
-  //   } else if (month == '08') {
-  //     parseMonth = 'Agu';
-  //   } else if (month == '09') {
-  //     parseMonth = 'Sep';
-  //   } else if (month == '10') {
-  //     parseMonth = 'Okt';
-  //   } else if (month == '11') {
-  //     parseMonth = 'Nov';
-  //   } else if (month == '12') {
-  //     parseMonth = 'Des';
-  //   }
-  //   _dateNow = '$day $parseMonth $year';
-  //   return _dateNow;
-  // }
-
   _getDatePeriode(String _date, String periode) {
-    // DateTime dateFormat = DateFormat('dd-MM-yyyy').parse(_date);
     var parts = _date.split('/');
-    var dateNow = DateTime.now();
-    // var dayNow = DateFormat('dd').format(dateNow);
-    // var monthNow = DateFormat('MM').format(dateNow);
-    // var yearNow = DateFormat('yy').format(dateNow);
     var firstDate = _date.length <= 8 ? _date : parts[0].trim();
     var firstDay = firstDate.substring(0, 2);
     var firstMonth = firstDate.substring(2, 4);
@@ -222,7 +148,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
         _dateNow = '$parseFirstMonth $firstYear - $parseMonth $year';
       } else {
         _dateNow =
-            '$firstDay $parseFirstMonth $firstYear - $date $parseMonth $year';
+        '$firstDay $parseFirstMonth $firstYear - $date $parseMonth $year';
       }
     } else {
       if (periode.toLowerCase() == 'bulanan') {
@@ -290,24 +216,6 @@ class _TransaksiPageState extends State<TransaksiPage> {
       key: _refreshIndicatorKey,
       onRefresh: postRequestLastPayment,
       child: Scaffold(
-        appBar: AppBar(
-          // leading: IconButton(
-          //   icon: Icon(Icons.arrow_back_ios),
-          //   iconSize: 20.0,
-          //   onPressed: () {
-          //     _goBack(context);
-          //   },
-          // ),
-          centerTitle: true,
-          title: Text(
-            'Riwayat',
-            style: TextStyle(
-              fontFamily: 'poppins regluar',
-              fontSize: 14.0,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
         backgroundColor: Color(0xFFF2F2F2),
         body: Container(
           padding: EdgeInsets.only(top: 19, bottom: 19),
@@ -328,32 +236,27 @@ class _TransaksiPageState extends State<TransaksiPage> {
                         itemBuilder: (context, index) {
                           return Column(
                             children: [
-                              GestureDetector(
+                              data[index].status == '1' ? GestureDetector(
                                 onTap: () {
                                   setState(() {
-                                    // _listNpwrd.clear();
-                                    // _listNpwrd.add(data[index].npwrd);
-                                    // requestProduk(data[index].npwrd);
-                                    // print(_getDatePeriode(
-                                    //     data[index].periode.toString()));
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) =>
                                             BuktiBayarRiwayatScreen(
-                                          ntrd: data[index].ntrd,
-                                          npwrd: data[index].npwrd,
-                                          tanggalPenagihan: _getDate(
-                                              data[index].tanggalPenagihan),
-                                          nominalPajak: data[index].nominal,
-                                          name: _name,
-                                          periodePenagihan:
+                                              ntrd: data[index].ntrd,
+                                              npwrd: data[index].npwrd,
+                                              tanggalPenagihan: _getDate(
+                                                  data[index].tanggalPenagihan),
+                                              nominalPajak: data[index].nominal,
+                                              name: _name,
+                                              periodePenagihan:
                                               data[index].satuanPeriode,
-                                          periodeBayar: _getDatePeriode(
-                                              data[index].periode.toString(),
-                                              data[index].satuanPeriode),
-                                          status: data[index].status,
-                                        ),
+                                              periodeBayar: _getDatePeriode(
+                                                  data[index].periode.toString(),
+                                                  data[index].satuanPeriode),
+                                              status: data[index].status,
+                                            ),
                                       ),
                                     );
                                   });
@@ -370,23 +273,23 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                       children: [
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'NTRD',
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -413,23 +316,23 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                         _dash(context),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'NPWRD',
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -499,23 +402,23 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                         // _dash(context),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'Waktu Pembayaran',
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -536,7 +439,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                                   style: TextStyle(
                                                     fontSize: 11,
                                                     fontFamily:
-                                                        'opensans regular',
+                                                    'opensans regular',
                                                     fontWeight: FontWeight.w600,
                                                     color: Color(0xFF4F4F4F),
                                                   ),
@@ -548,8 +451,8 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                                   decoration: BoxDecoration(
                                                     color: Color(0xFFFFE38C),
                                                     borderRadius:
-                                                        BorderRadius.circular(
-                                                            9.0),
+                                                    BorderRadius.circular(
+                                                        9.0),
                                                     // border: Border.all(width: 2, color: Colors.white),
                                                   ),
                                                   child: Text(
@@ -557,9 +460,9 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w600,
+                                                      FontWeight.w600,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -571,23 +474,23 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                         _dash(context),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'Total Nilai Retribusi',
                                                     style: TextStyle(
                                                       fontSize: 11,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -602,10 +505,10 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                             ),
                                             Text(
                                               NumberFormat.simpleCurrency(
-                                                      locale: 'id',
-                                                      decimalDigits: 0)
+                                                  locale: 'id',
+                                                  decimalDigits: 0)
                                                   .format(int.parse(
-                                                      data[index].nominal))
+                                                  data[index].nominal))
                                                   .toString(),
                                               style: TextStyle(
                                                 fontSize: 11,
@@ -619,23 +522,23 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                         _dash(context),
                                         Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
+                                          MainAxisAlignment.spaceBetween,
                                           children: [
                                             Container(
                                               width: 132,
                                               child: Row(
                                                 mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
+                                                MainAxisAlignment
+                                                    .spaceBetween,
                                                 children: [
                                                   Text(
                                                     'Status',
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       fontFamily:
-                                                          'opensans regular',
+                                                      'opensans regular',
                                                       fontWeight:
-                                                          FontWeight.w400,
+                                                      FontWeight.w400,
                                                       color: Color(0xFF4F4F4F),
                                                     ),
                                                   ),
@@ -652,11 +555,11 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                               data[index].status == '1'
                                                   ? 'Belum Generate Billing'
                                                   : data[index].status == '2'
-                                                      ? 'Sudah Generate Billing'
-                                                      : data[index].status ==
-                                                              '3'
-                                                          ? 'Kode Billing Kedaluwarsa'
-                                                          : 'Lunas',
+                                                  ? 'Sudah Generate Billing'
+                                                  : data[index].status ==
+                                                  '3'
+                                                  ? 'Kode Billing Kedaluwarsa'
+                                                  : 'Lunas',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 fontFamily: 'opensans regular',
@@ -664,11 +567,11 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                                 color: data[index].status == '1'
                                                     ? Color(0xFFF2994A)
                                                     : data[index].status == '2'
-                                                        ? Color(0xFF27AE60)
-                                                        : data[index].status ==
-                                                                '3'
-                                                            ? Color(0xFFF2994A)
-                                                            : Color(0xFF27AE60),
+                                                    ? Color(0xFF27AE60)
+                                                    : data[index].status ==
+                                                    '3'
+                                                    ? Color(0xFFF2994A)
+                                                    : Color(0xFF27AE60),
                                               ),
                                             ),
                                           ],
@@ -677,7 +580,7 @@ class _TransaksiPageState extends State<TransaksiPage> {
                                     ),
                                   ),
                                 ),
-                              ),
+                              ) : Container(),
                               SizedBox(height: 10),
                             ],
                           );
@@ -707,11 +610,4 @@ class _TransaksiPageState extends State<TransaksiPage> {
       ),
     );
   }
-}
-
-_goBack(BuildContext context) {
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (context) => DashboardScreen()),
-  );
 }

@@ -1,7 +1,8 @@
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
-import 'package:simpada/screen/riwayat/transaksi_page.dart';
+import 'package:simpada/screen/riwayat/belum_generate_page.dart';
+import 'package:simpada/screen/riwayat/sudah_generate_page.dart';
 
 import '../generate/riwayat_penyetoran_page.dart';
 
@@ -43,10 +44,10 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
         )),
     tabs: [
       Tab(
-        text: 'Transaksi',
+        text: 'Belum Generate Billing',
       ),
       Tab(
-        text: 'Billing',
+        text: 'Sudah Generate Billing',
       ),
     ],
   );
@@ -96,14 +97,14 @@ class _RiwayatScreenState extends State<RiwayatScreen> {
                 children: [
                   Navigator(
                     onGenerateRoute: (settings) {
-                      Widget page = TransaksiPage();
+                      Widget page = BelumGeneratePage();
                       // if (settings.name == 'page2') page = SplashScreen();
                       return MaterialPageRoute(builder: (_) => page);
                     },
                   ),
                   Navigator(
                     onGenerateRoute: (settings) {
-                      Widget page = RiwayatPenyetoranPage();
+                      Widget page = SudahGeneratePage();
                       return MaterialPageRoute(builder: (_) => page);
                     },
                   ),

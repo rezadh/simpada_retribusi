@@ -178,7 +178,7 @@ public class MainActivity extends FlutterActivity {
             try{
                 format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_DH_24_48_IN_BOLD);
                 format.putInt(PrinterConfig.addText.Alignment.BundleName, PrinterConfig.addText.Alignment.CENTER);
-                printer.addText(format, json.getString("title"));
+                printer.addText(format, json.getString("kode"));
                 printer.feedLine(1);
 
             } catch (Exception err) {
@@ -193,7 +193,7 @@ public class MainActivity extends FlutterActivity {
                 format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_24_24);
                 format.putInt(PrinterConfig.addText.Alignment.BundleName, PrinterConfig.addText.Alignment.CENTER);
                 printer.addText(format, json.getString("info"));
-                printer.feedLine(2);
+                printer.feedLine(1);
 
             } catch (Exception err) {
                 // Log.d("errorFormatting", err.toString());
@@ -204,9 +204,9 @@ public class MainActivity extends FlutterActivity {
 
             //KATEGORI KENDARAAN DATA ------------------------------------------------------------------------------------ 5
             try{
-                format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_DH_24_48_IN_BOLD);
+                format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_24_24);
                 format.putInt(PrinterConfig.addText.Alignment.BundleName, PrinterConfig.addText.Alignment.CENTER);
-                printer.addText(format, json.getString("category"));
+                printer.addText(format, json.getString("tanggal"));
                 printer.feedLine(1);
             } catch (Exception err) {
                 // Log.d("errorFormatting", err.toString());
@@ -234,7 +234,7 @@ public class MainActivity extends FlutterActivity {
             try{
                 format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_DH_24_48_IN_BOLD);
                 format.putInt(PrinterConfig.addText.Alignment.BundleName, PrinterConfig.addText.Alignment.CENTER);
-                printer.addText(format, json.getString("noplat"));
+                printer.addText(format, json.getString("info2"));
                 printer.feedLine(1);
             } catch (Exception err) {
                 // Log.d("errorFormatting", err.toString());
@@ -243,16 +243,16 @@ public class MainActivity extends FlutterActivity {
             try{
                 format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_24_24);
                 format.putInt(PrinterConfig.addText.Alignment.BundleName, PrinterConfig.addText.Alignment.CENTER);
-                printer.addText(format, "\n" + json.getString("nostruk"));
+                printer.addText(format, json.getString("periode"));
                 printer.feedLine(1);
             } catch (Exception err) {
                 // Log.d("errorFormatting", err.toString());
             }
             //TGL MASUK DATA ------------------------------------------------------------------------------------ 5
             try{
-                format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_24_24);
+                format.putInt(PrinterConfig.addText.FontSize.BundleName, PrinterConfig.addText.FontSize.NORMAL_DH_24_48_IN_BOLD);
                 format.putInt(PrinterConfig.addText.Alignment.BundleName, PrinterConfig.addText.Alignment.CENTER);
-                printer.addText(format, "\n" + json.getString("masuk"));
+                printer.addText(format, "\n" + json.getString("nominal"));
                 printer.feedLine(1);
             } catch (Exception err) {
                 // Log.d("errorFormatting", err.toString());

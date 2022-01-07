@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simpada/data/api/api_service.dart';
-import 'package:simpada/data/model/simpada_retribusi.dart';
+import 'package:simpada/data/model/kode_billing_model.dart';
+import 'package:simpada/data/model/ntrd_model.dart';
 import 'package:simpada/screen/generate/generate_code_screen.dart';
 
 class GenerateScreen extends StatefulWidget {
@@ -180,10 +180,10 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                 dataNilai.clear();
                                 if (dataNTRD.isEmpty) {
                                   for (int i = 0; i < data.length; i++) {
-                                    print(data[i].ntrd);
-                                    print(data[i].tanggalPenagihan);
+                                    // print(data[i].ntrd);
+                                    // print(data[i].tanggalPenagihan);
                                     if (data[i].status == 1) {
-                                      print(data[i].status);
+                                      // print(data[i].status);
                                       dataNTRD.add(data[i].ntrd);
                                       dataTanggal.add(_getDateFormat(
                                           data[i].tanggalPenagihan));
@@ -209,7 +209,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                         ),
                                         SizedBox(height: 7),
                                         Container(
-                                          width: 110,
+                                          width: 120,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
@@ -256,7 +256,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                         ),
                                         SizedBox(height: 7),
                                         Container(
-                                          width: 50,
+                                          width: 45,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
@@ -303,7 +303,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                         ),
                                         SizedBox(height: 7),
                                         Container(
-                                          width: 55,
+                                          width: 50,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
@@ -372,13 +372,15 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                       element.selected = value;
                                                     });
                                                     if (checked) {
-                                                      for (int i = 0;
-                                                          i < dataNTRD.length;
-                                                          i++) {
-                                                        selectedNTRD
-                                                            .add(dataNTRD[i]);
-                                                        selectedNilai
-                                                            .add(dataNilai[i]);
+                                                      if(selectedNTRD.isEmpty){
+                                                        for (int i = 0;
+                                                        i < dataNTRD.length;
+                                                        i++) {
+                                                          selectedNTRD
+                                                              .add(dataNTRD[i]);
+                                                          selectedNilai
+                                                              .add(dataNilai[i]);
+                                                        }
                                                       }
                                                     } else {
                                                       for (int i = 0;
@@ -401,7 +403,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                           ),
                                         ),
                                         Container(
-                                          width: 20,
+                                          width: 10,
                                           child: ListView.builder(
                                             physics:
                                                 NeverScrollableScrollPhysics(),
@@ -477,14 +479,7 @@ class _GenerateScreenState extends State<GenerateScreen> {
                                                                           b));
                                                               print(
                                                                   selectedNTRD);
-                                                              // print(
-                                                              //     selectedIndexes);
-                                                              // print(
-                                                              //     selectedNTRD);
-                                                              // print(
-                                                              //     selectedNilai);
                                                               // checkBoxValue = value;
-                                                              // print(checkBoxValue);
                                                             });
                                                           },
                                                         ),

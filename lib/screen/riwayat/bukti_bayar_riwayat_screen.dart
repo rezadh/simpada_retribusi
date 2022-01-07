@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:simpada/data/api/api_service.dart';
+import 'package:simpada/data/model/daftar_produk_model.dart';
+import 'package:simpada/data/model/profile_model.dart';
 import 'package:simpada/data/model/simpada_retribusi.dart';
 import 'package:simpada/screen/dashboard/dashboard_screen.dart';
 
@@ -121,7 +123,7 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-      appBar: AppBar(
+      // appBar: AppBar(
         // leading: IconButton(
         //   icon: Icon(Icons.arrow_back_ios),
         //   iconSize: 20.0,
@@ -129,16 +131,16 @@ class _BuktiBayarRiwayatScreenState extends State<BuktiBayarRiwayatScreen> {
         //     _goBack(context);
         //   },
         // ),
-        centerTitle: true,
-        title: Text(
-          'Riwayat',
-          style: TextStyle(
-            fontFamily: 'poppins regluar',
-            fontSize: 14.0,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
+      //   centerTitle: true,
+      //   title: Text(
+      //     'Riwayat',
+      //     style: TextStyle(
+      //       fontFamily: 'poppins regluar',
+      //       fontSize: 14.0,
+      //     ),
+      //     textAlign: TextAlign.center,
+      //   ),
+      // ),
       resizeToAvoidBottomInset: false,
       backgroundColor: Color(0xFFFFFFFF),
       body: Container(
